@@ -28,6 +28,25 @@ class AdminController extends Controller
             'recentUsers'=>User::latest()->limit(8)->get(),
         ]);
     }
+    public function importCatalog(Request $request){
+        $request->validate(['file'=>'required|file|mimes:csv,txt|max:20480']);
+        $file=$request->file('file'); $path=$file->store('catalog-imports');
+        $jobId=DB::table('catalog_imports')->insertGetId(['user_id'=>$request->user()->id,'source_type'=>'csv','source_name'=>$file->getClientOriginalName(),'file_path'=>$path,'status'=>'processing','created_at'=>now(),'updated_at'=>now()]);
+        $handle=fopen($file->getRealPath(),'r'); $header=array_map(fn($v)=>Str::snake(trim((string)$v)), fgetcsv($handle) ?: []); $total=$ok=$failed=0; $errors=[];
+        while(($row=fgetcsv($handle))!==false){$total++; $data=array_combine($header,$row); try{
+            if(empty($data['name'])) throw new \RuntimeException('name is required');
+            $vendorId=(int)($data['vendor_id']??0); $categoryId=!empty($data['category_id'])?(int)$data['category_id']:null;
+            abort_unless($vendorId>0 && DB::table('vendors')->where('id',$vendorId)->exists(),422,'Invalid vendor_id');
+            $existing=!empty($data['sku'])?Product::where('sku',$data['sku'])->first():null;
+            $payload=['vendor_id'=>$vendorId,'category_id'=>$categoryId,'brand_id'=>!empty($data['brand_id'])?(int)$data['brand_id']:null,'name'=>trim($data['name']),'retail_price'=>(float)($data['retail_price']??0),'cost_price'=>isset($data['cost_price'])?(float)$data['cost_price']:null,'currency'=>strtoupper($data['currency']??'USD'),'stock'=>(float)($data['stock']??0),'description'=>$data['description']??null];
+            if($existing){$existing->update($payload);$product=$existing;}else{$payload['slug']=Str::slug($payload['name']).'-'.Str::lower(Str::random(6));$payload['sku']=$data['sku']??('CP-'.strtoupper(Str::random(8)));$payload['status']='pending';$payload['stock_status']=$payload['stock']>0?'in_stock':'out_of_stock';$product=Product::create($payload);}
+            if(!DB::table('product_identifiers')->where('product_id',$product->id)->exists()) DB::table('product_identifiers')->insert(['product_id'=>$product->id,'product_code'=>'CP-PROD-'.str_pad((string)$product->id,8,'0',STR_PAD_LEFT),'internal_sku'=>$product->sku,'barcode_value'=>'CP'.str_pad((string)$product->id,12,'0',STR_PAD_LEFT),'barcode_type'=>'CODE128','qr_token'=>bin2hex(random_bytes(20)),'created_at'=>now(),'updated_at'=>now()]); $ok++;
+        }catch(\Throwable $e){$failed++;$errors[]=['row'=>$total,'error'=>$e->getMessage()];}}
+        fclose($handle); DB::table('catalog_imports')->where('id',$jobId)->update(['status'=>$failed?'failed':'completed','total_rows'=>$total,'imported_rows'=>$ok,'failed_rows'=>$failed,'error_log'=>$errors?json_encode($errors):null,'updated_at'=>now()]); return back()->with('success',"CSV processed: {$ok} imported, {$failed} failed.");
+    }
+    public function aiProductBuilder(Request $request){
+        $data=$request->validate(['input'=>'required|string|max:2000']); $prompt="Return JSON only with keys title,short_description,highlights,description,specifications,features,seo_title,seo_description,keywords,category_suggestion. Create marketplace product content from: ".$data['input']; $raw=app(\App\Services\GeminiService::class)->ask($prompt); $json=json_decode($raw,true); return response()->json(['ok'=>true,'data'=>$json,'raw'=>$raw]);
+    }
     public function catalogTools(){
         $imports=DB::table('catalog_imports')->latest('id')->paginate(15);
         return view('admin.catalog-tools',['imports'=>$imports,'identifierCount'=>DB::table('product_identifiers')->count(),'subscriptionPlans'=>DB::table('subscription_plans')->where('status',1)->count()]);
