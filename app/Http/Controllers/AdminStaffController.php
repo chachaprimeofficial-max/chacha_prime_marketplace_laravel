@@ -12,7 +12,6 @@ class AdminStaffController extends Controller
     {
         $staff=DB::table('users')->whereIn('role',['admin','staff'])->latest()->paginate(25);
         $permissions=DB::table('permissions')->orderBy('name')->get();
-        $rolePermissions=DB::table('role_permissions')->join('roles','roles.id','=','role_permissions.role_id')->pluck('role_permissions.permission_id','roles.name')->groupBy(function($x){return $x;})->all();
         $rolePermissionMap=[]; foreach(DB::table('roles')->whereIn('name',['admin','staff'])->get() as $role){$rolePermissionMap[$role->name]=DB::table('role_permissions')->where('role_id',$role->id)->pluck('permission_id')->all();}
         return view('admin.staff',compact('staff','permissions','rolePermissionMap'));
     }
