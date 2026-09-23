@@ -20,7 +20,7 @@ Route::get('/vendor/register',fn()=>redirect()->route('auth.register',['type'=>'
 Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->group(function(){Route::view('/dashboard','vendor.dashboard')->name('dashboard');});
 Route::middleware(['auth','role:super_admin,admin'])->prefix('admin')->name('admin.')->group(function(){
  Route::get('/',fn()=>redirect()->route('admin.dashboard'));
- Route::get('/dashboard',fn()=>view('admin.dashboard'))->name('dashboard');
+ Route::get('/dashboard',[AdminController::class,'dashboard'])->name('dashboard');
  Route::get('/users',[AdminController::class,'users'])->name('users');
  Route::post('/users/{user}',[AdminController::class,'updateUser'])->name('users.update');
  Route::get('/vendors',[AdminController::class,'vendors'])->name('vendors');
@@ -29,6 +29,8 @@ Route::middleware(['auth','role:super_admin,admin'])->prefix('admin')->name('adm
  Route::post('/products',[AdminController::class,'storeProduct'])->name('products.store');
  Route::get('/categories',[AdminController::class,'categories'])->name('categories');
  Route::post('/categories',[AdminController::class,'storeCategory'])->name('categories.store');
+ Route::get('/module/{module}',[AdminController::class,'module'])->name('module');
+ Route::post('/module/{module}/{id}/toggle',[AdminController::class,'toggle'])->name('module.toggle');
  Route::get('/orders',[AdminCommerceController::class,'orders'])->name('orders');
  Route::post('/orders/{order}',[AdminCommerceController::class,'updateOrder'])->name('orders.update');
  Route::get('/payments',[AdminCommerceController::class,'payments'])->name('payments');
