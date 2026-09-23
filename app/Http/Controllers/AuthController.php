@@ -44,7 +44,7 @@ class AuthController extends Controller {
         $request->validate(['code'=>'required|digits:6']); $user=User::findOrFail(session('pending_totp_user'));
         if(!$user->totp_secret || !$totp->verify(decrypt($user->totp_secret),$request->code)) return back()->withErrors(['code'=>'Invalid authenticator code.']);
         Auth::login($user,true); $request->session()->regenerate(); session()->forget(['pending_auth_user','pending_totp_user','show_totp_setup']);
-        return match($user->role){'super_admin','admin','staff'=>redirect()->route('admin.dashboard'),'vendor'=>redirect()->route('vendor.dashboard'),default=>redirect()->route('customer.dashboard')};
+        return match($user->role){'super_admin','admin','staff'=>redirect()->route('admin.dashboard'),'vendor'=>redirect()->route('vendor.dashboard'),'affiliate'=>redirect()->route('affiliate.dashboard'),'courier'=>redirect()->route('courier.dashboard'),'streamer'=>redirect()->route('streamer.dashboard'),default=>redirect()->route('customer.dashboard')};
     }
     public function logout(Request $request){Auth::logout();$request->session()->invalidate();$request->session()->regenerateToken();return redirect()->route('home');}
     private function sendOtp(User $user): void {
