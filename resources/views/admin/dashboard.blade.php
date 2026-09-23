@@ -1,13 +1,5 @@
 @extends('layouts.storefront')
-@section('title', 'Admin Dashboard — Chacha Prime')
+@section('title','Admin Dashboard — Chacha Prime')
 @section('content')
-<div class="container dashboard-shell">
-    <div class="dashboard-heading"><div><span class="eyebrow">CONTROL CENTER</span><h1>Marketplace dashboard</h1></div><span class="status-pill">System online</span></div>
-    <div class="metric-grid">
-        <div class="metric-card"><span>Orders</span><strong>0</strong><small>Ready for live data</small></div>
-        <div class="metric-card"><span>Vendors</span><strong>0</strong><small>Onboarding pipeline</small></div>
-        <div class="metric-card"><span>Revenue</span><strong>—</strong><small>Connect payment reporting</small></div>
-        <div class="metric-card"><span>AI Assistant</span><strong>Ready</strong><small>Gemini configuration pending</small></div>
-    </div>
-</div>
+<section class="dashboard-shell"><div class="dashboard-hero"><span class="eyebrow">CONTROL CENTER</span><h1>Admin dashboard</h1><p>Platform operations, vendors, products, orders, payments, shipping, AI, live commerce and settings.</p></div><div class="dashboard-grid"><article class="dashboard-card"><span>Customers</span><strong>0</strong><small>Accounts</small></article><article class="dashboard-card"><span>Vendors</span><strong>0</strong><small>Pending approvals</small></article><article class="dashboard-card"><span>Orders</span><strong>0</strong><small>Marketplace orders</small></article><article class="dashboard-card"><span>Revenue</span><strong>$0</strong><small>Gross marketplace sales</small></article></div></section>
 @endsection
