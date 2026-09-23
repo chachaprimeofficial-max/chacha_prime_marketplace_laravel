@@ -1,3 +1,3 @@
-@extends('layouts.storefront')
+@extends('vendor.layout')
 @section('title','Returns & Refunds — Seller Center')
 @section('content')<div style="background:#f5f7fa;min-height:calc(100vh - 104px);padding:22px"><div style="max-width:1450px;margin:auto"><div style="background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:22px"><div style="font-size:10px;font-weight:900;letter-spacing:1.8px;color:#d97706">SELLER CENTER</div><h1 style="margin:6px 0">Returns & Refunds</h1><p style="color:#64748b;font-size:12px">Return request workspace is connected to seller-owned orders. The detailed request table and status controls will be used for processing.</p><a href="{{route('vendor.dashboard')}}" style="display:inline-block;margin-top:8px;padding:10px 14px;border-radius:10px;background:#111827;color:#fff;text-decoration:none;font-size:12px;font-weight:800">← Seller Overview</a></div></div></div>@endsection
