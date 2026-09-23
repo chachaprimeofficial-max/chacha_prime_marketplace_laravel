@@ -35,7 +35,7 @@ class AdminController extends Controller
         $handle=fopen($file->getRealPath(),'r'); $header=array_map(fn($v)=>Str::snake(trim((string)$v)), fgetcsv($handle) ?: []); $total=$ok=$failed=0; $errors=[];
         while(($row=fgetcsv($handle))!==false){$total++; $data=array_combine($header,$row); try{
             if(empty($data['name'])) throw new \RuntimeException('name is required');
-            $vendorId=(int)($data['vendor_id']??0); $categoryId=!empty($data['category_id'])?(int)$data['category_id']:null;
+            $vendorId=(int)($data['vendor_id']??0); $categoryId=!empty($data['category_id'])?(int)$data['category_id']:null; if(!$categoryId && !empty($data['category'])){$categoryId=DB::table('categories')->where('name',$data['category'])->value('id');}
             abort_unless($vendorId>0 && DB::table('vendors')->where('id',$vendorId)->exists(),422,'Invalid vendor_id');
             $existing=!empty($data['sku'])?Product::where('sku',$data['sku'])->first():null;
             $payload=['vendor_id'=>$vendorId,'category_id'=>$categoryId,'brand_id'=>!empty($data['brand_id'])?(int)$data['brand_id']:null,'name'=>trim($data['name']),'retail_price'=>(float)($data['retail_price']??0),'cost_price'=>isset($data['cost_price'])?(float)$data['cost_price']:null,'currency'=>strtoupper($data['currency']??'USD'),'stock'=>(float)($data['stock']??0),'description'=>$data['description']??null];
