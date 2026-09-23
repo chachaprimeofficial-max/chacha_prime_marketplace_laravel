@@ -18,6 +18,8 @@
 <a class="{{request()->routeIs('admin.users')?'active':''}}" href="{{route('admin.users')}}">♙ <span>Users & Customers</span></a>
 <a class="{{request()->routeIs('admin.vendors')?'active':''}}" href="{{route('admin.vendors')}}">◈ <span>Vendors</span></a>
 <a class="{{request()->routeIs('admin.products')?'active':''}}" href="{{route('admin.products')}}">▣ <span>Products</span></a>
+<a class="{{request()->routeIs('admin.catalog-tools')?'active':''}}" href="{{route('admin.catalog-tools')}}">✦ <span>Catalog AI & Import</span></a>
+<a class="{{request()->routeIs('admin.scan-center*')?'active':''}}" href="{{route('admin.scan-center')}}">▦ <span>Scan & Lookup</span></a>
 <a class="{{request()->routeIs('admin.categories')?'active':''}}" href="{{route('admin.categories')}}">☷ <span>Categories</span></a>
 <a class="{{request()->routeIs('admin.orders')?'active':''}}" href="{{route('admin.orders')}}">▤ <span>Orders</span></a>
 <a class="{{request()->routeIs('admin.payments')?'active':''}}" href="{{route('admin.payments')}}">◇ <span>Payments</span></a>
