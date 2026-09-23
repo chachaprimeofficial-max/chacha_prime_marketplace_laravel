@@ -153,7 +153,7 @@
             <tbody>
             @forelse($recentProducts as $p)
               <tr>
-                <td><strong>{{Str::limit($p->name,42)}}</strong></td>
+                <td><strong>{{\Illuminate\Support\Str::limit($p->name,42)}}</strong></td>
                 <td>{{$p->sku}}</td>
                 <td>{{$p->currency}} {{number_format((float)$p->retail_price,2)}}</td>
                 <td>{{$p->stock}}</td>
