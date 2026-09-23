@@ -14,7 +14,7 @@ class SupportAiService
     public function reply(User $user, string $message, ?int $conversationId = null): array
     {
         $conversation = $conversationId
-            ? DB::table('support_conversations')->where('id', $conversationId)->where('customer_id', $user->id)->first()
+            ? DB::table('support_conversations')->where('id', $conversationId)->where('customer_id', $user->id)->where('type','customer_support')->first()
             : $this->support->conversationForUser($user->id);
 
         if (!$conversation) {
