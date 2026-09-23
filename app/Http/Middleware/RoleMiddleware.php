@@ -22,7 +22,7 @@ class RoleMiddleware
 
     protected function allowed(string $role, Request $request): bool
     {
-        if($role==='admin') return true;
+        if(in_array($role,['admin','super_admin'],true)) return true;
         $route=$request->route()?->getName() ?? '';
         $permissionMap=[
             'admin.dashboard'=>'dashboard.view','admin.users'=>'users.view','admin.users.update'=>'users.manage',
@@ -32,6 +32,7 @@ class RoleMiddleware
             'admin.payments.update'=>'payments.manage','admin.wallets'=>'wallets.manage','admin.wallets.adjust'=>'wallets.manage',
             'admin.cards'=>'cards.manage','admin.cards.issue'=>'cards.manage','admin.staff'=>'staff.manage',
             'admin.staff.update'=>'staff.manage','admin.staff.permissions'=>'permissions.manage',
+   'admin.audit-logs'=>'audit.view',
         ];
         $permission=$permissionMap[$route] ?? (str_starts_with($route,'admin.module')?'modules.manage':null);
         if(!$permission) return false;
