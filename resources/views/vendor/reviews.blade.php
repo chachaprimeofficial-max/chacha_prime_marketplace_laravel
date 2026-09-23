@@ -1,0 +1,3 @@
+@extends('layouts.storefront')
+@section('title','Vendor Reviews')
+@section('content')<div class="container"><h1>Customer Reviews</h1><div class="panel"><div class="table-wrap"><table><tr><th>Product</th><th>Rating</th><th>Review</th><th>Status</th></tr>@foreach($reviews as $r)<tr><td>{{$r->product_id}}</td><td>{{$r->rating}}</td><td>{{Str::limit($r->comment ?? '',120)}}</td><td>{{$r->status}}</td></tr>@endforeach</table></div>{{$reviews->links()}}</div></div>@endsection
