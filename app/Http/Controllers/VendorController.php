@@ -30,8 +30,9 @@ class VendorController extends Controller
  }
 
  public function products(Request $request){
-  $vendor=$this->vendor($request);
-  return view('vendor.products',['vendor'=>$vendor,'products'=>Product::where('vendor_id',$vendor->id)->latest()->paginate(15),'categories'=>DB::table('categories')->where('status',1)->orderBy('name')->get()]);
+  $vendor=$this->vendor($request); $q=trim((string)$request->get('q','')); $status=$request->get('status');
+  $query=Product::where('vendor_id',$vendor->id)->when($q,fn($x)=>$x->where(fn($y)=>$y->where('name','like','%'.$q.'%')->orWhere('sku','like','%'.$q.'%')))->when($status,fn($x)=>$x->where('status',$status));
+  return view('vendor.products',['vendor'=>$vendor,'products'=>$query->latest()->paginate(15)->withQueryString(),'categories'=>DB::table('categories')->where('status',1)->orderBy('name')->get(),'brands'=>DB::table('brands')->where('status',1)->orderBy('name')->get(),'catalogStats'=>['total'=>Product::where('vendor_id',$vendor->id)->count(),'published'=>Product::where('vendor_id',$vendor->id)->where('status','published')->count(),'pending'=>Product::where('vendor_id',$vendor->id)->where('status','pending')->count(),'low'=>Product::where('vendor_id',$vendor->id)->where('stock','<=',10)->count()],'q'=>$q,'status'=>$status]);
  }
 
  public function storeProduct(Request $request){
