@@ -13,6 +13,17 @@
 <section class="cp-card cp-pdp-info">
 <h1>{{$product->name}}</h1>
 <div class="cp-store">Store: <a href="{{route('shop')}}?vendor={{$product->vendor_id}}">{{$product->vendor?->business_name ?? 'Chacha Prime Marketplace'}}</a></div>
+@auth
+<div style="margin:9px 0 12px;padding:10px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:9px">
+<form method="POST" action="{{route('customer.support.vendor.start',$product->vendor_id)}}" style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">@csrf
+<input type="hidden" name="subject" value="Product support: {{$product->name}}">
+<input name="message" required maxlength="5000" placeholder="Ask the seller about this product..." style="flex:1;min-width:220px;padding:9px;border:1px solid #dbe1e8;border-radius:8px">
+<button type="submit" style="padding:9px 12px;border:0;border-radius:8px;background:#111827;color:#fff;font-size:10px;font-weight:900">Contact Seller</button>
+</form>
+</div>
+@else
+<div style="margin:9px 0 12px;font-size:10px;color:#64748b">Sign in to message the seller about this product.</div>
+@endauth
 <div class="cp-rating"><span class="cp-stars">{{str_repeat('★',(int)round($avgRating))}}{{str_repeat('☆',5-(int)round($avgRating))}}</span><a href="#reviews" style="color:#007185">{{$avgRating?number_format($avgRating,1):'0.0'}} ({{$reviewCount}} ratings)</a><span>• SKU {{$product->sku}}</span></div>
 <p style="font-size:12px;color:#475569;line-height:1.6">{{ $product->short_description }}</p>
 <div class="cp-price">{{$price}} {{$product->currency}}</div><div class="cp-price-row"><span>Retail: <b>{{$product->retail_price}} {{$product->currency}}</b></span><span>Wholesale: <b>{{$product->wholesale_price ?: '—'}}</b></span><span>Factory: <b>{{$product->factory_price ?: '—'}}</b></span></div>
