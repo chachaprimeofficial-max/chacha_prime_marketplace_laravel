@@ -1,0 +1,8 @@
+@extends('admin.layout')
+@section('title','Users — Chacha Prime')
+@section('page_heading','Users Management')
+@section('content')
+<div class="panel"><h2>Users</h2>@if(session('success'))<p style="color:#17652a">{{ session('success') }}</p>@endif
+<table style="width:100%;border-collapse:collapse"><tr><th align="left">User</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th></tr>
+@foreach($users as $user)<tr><td style="padding:12px 4px">{{ $user->name }}</td><td>{{ $user->email }}</td><td>{{ $user->role }}</td><td>{{ $user->status }}</td><td><form method="POST" action="{{ route('admin.users.update',$user) }}" style="display:flex;gap:6px">@csrf<select name="role"><option value="customer" @selected($user->role==='customer')>Customer</option><option value="b2b_customer" @selected($user->role==='b2b_customer')>B2B</option><option value="vendor" @selected($user->role==='vendor')>Vendor</option><option value="admin" @selected($user->role==='admin')>Admin</option><option value="super_admin" @selected($user->role==='super_admin')>Super Admin</option></select><select name="status"><option value="active" @selected($user->status==='active')>Active</option><option value="blocked" @selected($user->status==='blocked')>Blocked</option><option value="suspended" @selected($user->status==='suspended')>Suspended</option></select><button class="button button-dark" type="submit">Save</button></form></td></tr>@endforeach</table>{{ $users->links() }}</div>
+@endsection
