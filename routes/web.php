@@ -4,11 +4,14 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminCommerceController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\StorefrontController;
+use App\Http\Controllers\AiController;
 use Illuminate\Support\Facades\Route;
 Route::get('/',[StorefrontController::class,'home'])->name('home');
 Route::get('/shop',[StorefrontController::class,'shop'])->name('shop');
 Route::get('/product/{id}',[StorefrontController::class,'product'])->name('product');
 Route::get('/cart',[StorefrontController::class,'cart'])->name('cart');
+Route::get('/ai-assistant',[AiController::class,'index'])->name('ai.assistant');
+Route::post('/ai-assistant/ask',[AiController::class,'ask'])->middleware('throttle:20,1')->name('ai.assistant.ask');
 Route::post('/cart/{id}',[StorefrontController::class,'addToCart'])->name('cart.add');
 Route::post('/cart/{id}/remove',[StorefrontController::class,'removeFromCart'])->name('cart.remove');
 Route::middleware('auth')->group(function(){
