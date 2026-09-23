@@ -8,6 +8,7 @@ use App\Http\Controllers\AiController;
 use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\AdminStaffController;
 use App\Http\Controllers\AdminAuditLogController;
+use App\Http\Controllers\RoleDashboardController;
 use Illuminate\Support\Facades\Route;
 Route::get('/',[StorefrontController::class,'home'])->name('home');
 Route::get('/shop',[StorefrontController::class,'shop'])->name('shop');
@@ -41,6 +42,9 @@ Route::prefix('auth')->name('auth.')->group(function(){
  Route::post('/logout',[AuthController::class,'logout'])->middleware('auth')->name('logout');
 });
 Route::get('/vendor/register',fn()=>redirect()->route('auth.register',['type'=>'vendor']))->name('vendor.register');
+Route::middleware(['auth','role:affiliate'])->prefix('affiliate')->name('affiliate.')->group(function(){Route::get('/dashboard',[RoleDashboardController::class,'affiliate'])->name('dashboard');});
+Route::middleware(['auth','role:courier'])->prefix('courier')->name('courier.')->group(function(){Route::get('/dashboard',[RoleDashboardController::class,'courier'])->name('dashboard');});
+Route::middleware(['auth','role:streamer'])->prefix('streamer')->name('streamer.')->group(function(){Route::get('/dashboard',[RoleDashboardController::class,'streamer'])->name('dashboard');});
 Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->group(function(){
  Route::get('/dashboard',[VendorController::class,'dashboard'])->name('dashboard');
  Route::get('/products',[VendorController::class,'products'])->name('products');
