@@ -52,6 +52,13 @@ class SupportController extends Controller
         $conversation=DB::table('support_conversations')->where('id',$id)->where('customer_id',$request->user()->id)->firstOrFail();
         abort_if($conversation->status==='closed',422,'This conversation is closed. Open a new support case.');
         $support->addMessage($id,$request->user()->id,'customer',$data['body']);
+        if ($conversation->type === 'customer_vendor' && $conversation->vendor_id) {
+            $recipient=(int) DB::table('vendors')->where('id',$conversation->vendor_id)->value('user_id');
+            if($recipient) DB::table('notifications')->insert(['user_id'=>$recipient,'type'=>'support.customer_message','title'=>'New customer message','message'=>'A customer replied to support conversation #'.$id.'.','data'=>json_encode(['conversation_id'=>$id]),'created_at'=>now()]);
+        } else {
+            $staffIds=DB::table('users')->whereIn('role',['super_admin','admin','staff'])->where('status','active')->pluck('id');
+            foreach($staffIds as $recipient) DB::table('notifications')->insert(['user_id'=>$recipient,'type'=>'support.customer_message','title'=>'New customer support message','message'=>'Customer #'.$request->user()->id.' replied to case #'.$id.'.','data'=>json_encode(['conversation_id'=>$id]),'created_at'=>now()]);
+        }
         DB::table('support_conversations')->where('id',$id)->update(['status'=>'open','updated_at'=>now()]);
         return back();
     }
@@ -117,6 +124,8 @@ class SupportController extends Controller
         $conversation=DB::table('support_conversations')->where('id',$id)->where('vendor_id',$vendor->id)->where('type','vendor_support')->firstOrFail();
         abort_if($conversation->status==='closed',422,'This support case is closed.');
         $support->addMessage($id,$request->user()->id,'vendor',$data['body']);
+        $staffIds=DB::table('users')->whereIn('role',['super_admin','admin','staff'])->where('status','active')->pluck('id');
+        foreach($staffIds as $recipient) DB::table('notifications')->insert(['user_id'=>$recipient,'type'=>'support.vendor_message','title'=>'New seller support message','message'=>'Seller #'.$vendor->id.' replied to support case #'.$id.'.','data'=>json_encode(['conversation_id'=>$id]),'created_at'=>now()]);
         DB::table('support_conversations')->where('id',$id)->update(['status'=>'open','updated_at'=>now()]);
         return back();
     }
@@ -128,6 +137,8 @@ class SupportController extends Controller
         $conversation=DB::table('support_conversations')->where('id',$id)->where('vendor_id',$vendor->id)->where('type','customer_vendor')->firstOrFail();
         abort_if($conversation->status==='closed',422,'This conversation is closed.');
         $support->addMessage($id,$request->user()->id,'vendor',$data['body']);
+        $customerId=(int) $conversation->customer_id;
+        if($customerId) DB::table('notifications')->insert(['user_id'=>$customerId,'type'=>'support.vendor_message','title'=>'New seller reply','message'=>'A seller replied to your conversation #'.$id.'.','data'=>json_encode(['conversation_id'=>$id]),'created_at'=>now()]);
         DB::table('support_conversations')->where('id',$id)->update(['status'=>'open','updated_at'=>now()]);
         return back()->with('customer_conversation',$id);
     }
