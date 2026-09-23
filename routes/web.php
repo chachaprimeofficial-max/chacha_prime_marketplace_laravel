@@ -58,8 +58,12 @@ Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->gr
  Route::post('/coupons',[VendorController::class,'storeCoupon'])->name('coupons.store');
  Route::get('/group-buying',[VendorController::class,'groupBuying'])->name('group-buying');
  Route::post('/group-buying',[VendorController::class,'storeGroupBuying'])->name('group-buying.store');
+ Route::post('/group-buying/{id}/toggle',[VendorController::class,'toggleGroupBuying'])->name('group-buying.toggle');
  Route::get('/live-commerce',[VendorController::class,'liveCommerce'])->name('live-commerce');
  Route::post('/live-commerce',[VendorController::class,'storeLive'])->name('live-commerce.store');
+ Route::post('/live-commerce/{id}/toggle',[VendorController::class,'toggleLive'])->name('live-commerce.toggle');
+ Route::post('/live-commerce/{id}/pin',[VendorController::class,'pinLiveProduct'])->name('live-commerce.pin');
+ Route::delete('/live-commerce/{id}/pin/{productId}',[VendorController::class,'unpinLiveProduct'])->name('live-commerce.unpin');
  Route::get('/ai',[VendorController::class,'ai'])->name('ai');
  Route::get('/payouts',[VendorController::class,'payouts'])->name('payouts');
  Route::get('/orders',[VendorController::class,'orders'])->name('orders');
