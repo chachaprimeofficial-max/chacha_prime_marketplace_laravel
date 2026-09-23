@@ -2,6 +2,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminCommerceController;
+use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 Route::get('/',fn()=>view('storefront.home'))->name('home');
 Route::get('/health',fn()=>response()->json(['status'=>'ok','application'=>config('app.name'),'version'=>app()->version()]))->name('health');
@@ -17,7 +18,16 @@ Route::prefix('auth')->name('auth.')->group(function(){
  Route::post('/logout',[AuthController::class,'logout'])->middleware('auth')->name('logout');
 });
 Route::get('/vendor/register',fn()=>redirect()->route('auth.register',['type'=>'vendor']))->name('vendor.register');
-Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->group(function(){Route::view('/dashboard','vendor.dashboard')->name('dashboard');});
+Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->group(function(){
+ Route::get('/dashboard',[VendorController::class,'dashboard'])->name('dashboard');
+ Route::get('/products',[VendorController::class,'products'])->name('products');
+ Route::post('/products',[VendorController::class,'storeProduct'])->name('products.store');
+ Route::post('/products/{id}',[VendorController::class,'updateProduct'])->name('products.update');
+ Route::get('/orders',[VendorController::class,'orders'])->name('orders');
+ Route::post('/orders/{id}',[VendorController::class,'updateOrder'])->name('orders.update');
+ Route::get('/wallet',[VendorController::class,'wallet'])->name('wallet');
+ Route::get('/reviews',[VendorController::class,'reviews'])->name('reviews');
+});
 Route::middleware(['auth','role:super_admin,admin'])->prefix('admin')->name('admin.')->group(function(){
  Route::get('/',fn()=>redirect()->route('admin.dashboard'));
  Route::get('/dashboard',[AdminController::class,'dashboard'])->name('dashboard');
