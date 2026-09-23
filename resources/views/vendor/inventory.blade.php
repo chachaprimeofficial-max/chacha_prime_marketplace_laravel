@@ -1,1 +1,28 @@
-@extends('layouts.storefront') @section('title','Inventory') @section('content')<div class="dashboard-shell"><div class="panel"><h1>Inventory</h1><div class="table-wrap"><table><tr><th>Product</th><th>SKU</th><th>Stock</th><th>Status</th></tr>@foreach($products as $p)<tr><td>{{$p->name}}</td><td>{{$p->sku}}</td><td>{{$p->stock}}</td><td>{{$p->stock_status}}</td></tr>@endforeach</table></div>{{$products->links()}}</div></div>@endsection
+@extends('layouts.storefront')
+@section('title','Inventory — Seller Center')
+@push('styles')
+<style>
+.cp-inv{background:#f5f7fa;min-height:calc(100vh - 104px);padding:22px}.cp-inv-shell{max-width:1500px;margin:auto}.cp-inv-head{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:21px 23px;display:flex;justify-content:space-between;align-items:center;gap:18px;box-shadow:0 8px 28px #11182708}.eyebrow{color:#d97706;font-size:10px;font-weight:900;letter-spacing:1.7px}.cp-inv h1{margin:5px 0;font-size:29px;letter-spacing:-.7px}.cp-inv-head p{margin:0;color:#64748b;font-size:12px}.btn{display:inline-flex;padding:10px 14px;border-radius:10px;text-decoration:none;font-size:12px;font-weight:800;border:1px solid #dbe1e8;color:#1f2937;background:#fff}.btn.primary{background:#111827;color:#fff;border-color:#111827}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin:15px 0}.stat{background:#fff;border:1px solid #e5e7eb;border-radius:15px;padding:16px;box-shadow:0 7px 22px #11182706}.stat span{display:block;color:#64748b;font-size:10px;font-weight:800}.stat strong{display:block;font-size:25px;margin-top:7px}.stat small{color:#94a3b8;font-size:10px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:17px;padding:18px;box-shadow:0 7px 22px #11182706}.filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.filter input,.filter select{border:1px solid #dbe1e8;border-radius:9px;padding:9px 10px;font-size:11px;background:#fff}.filter input{min-width:250px}.filter button{border:0;background:#111827;color:#fff;border-radius:9px;padding:9px 14px;font-size:11px;font-weight:800}.filter a{padding:9px 12px;border:1px solid #dbe1e8;border-radius:9px;color:#475569;text-decoration:none;font-size:11px}.table-wrap{overflow:auto}.cp-inv table{width:100%;border-collapse:collapse;min-width:850px}.cp-inv th,.cp-inv td{padding:12px 9px;border-bottom:1px solid #eef0f3;text-align:left;font-size:11px}.cp-inv th{font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.7px}.name{font-weight:900;color:#111827}.muted{display:block;color:#94a3b8;font-size:9px;margin-top:3px}.stock{font-weight:900}.low{color:#b42318}.out{color:#b42318}.ok{color:#027a48}.badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:9px;font-weight:900;background:#f1f5f9;color:#475569;text-transform:capitalize}.badge.ok{background:#ecfdf3;color:#027a48}.badge.low{background:#fffaeb;color:#b54708}.badge.out{background:#fef3f2;color:#b42318}.edit{color:#b45309;font-weight:900;text-decoration:none}.notice{padding:11px 13px;border-radius:10px;background:#ecfdf3;color:#027a48;border:1px solid #abefc6;font-size:11px;font-weight:700;margin-bottom:13px}
+@media(max-width:850px){.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.cp-inv{padding:12px}.cp-inv-head{flex-direction:column;align-items:flex-start}.stats{grid-template-columns:1fr 1fr}.filter input{min-width:100%;width:100%}}@media(max-width:430px){.stats{grid-template-columns:1fr}}
+</style>
+@endpush
+@section('content')
+<div class="cp-inv"><div class="cp-inv-shell">
+<section class="cp-inv-head"><div><div class="eyebrow">SELLER CENTER / STOCK</div><h1>Inventory</h1><p>Monitor stock levels and quickly identify products that need attention.</p></div><a class="btn primary" href="{{route('vendor.products')}}">Manage Products</a></section>
+<div class="stats">
+<div class="stat"><span>Total SKUs</span><strong>{{$products->total()}}</strong><small>Catalog inventory</small></div>
+<div class="stat"><span>Low Stock</span><strong>{{collect($products->items())->where('stock','<=',10)->where('stock','>',0)->count()}}</strong><small>10 units or less</small></div>
+<div class="stat"><span>Out of Stock</span><strong>{{collect($products->items())->where('stock','<=',0)->count()}}</strong><small>Requires replenishment</small></div>
+<div class="stat"><span>Healthy on Page</span><strong>{{collect($products->items())->where('stock','>',10)->count()}}</strong><small>More than 10 units</small></div>
+</div>
+<section class="card">
+<form class="filter" method="GET"><input name="q" value="{{request('q')}}" placeholder="Search product name or SKU"><select name="stock"><option value="">All stock</option><option value="out" @selected(request('stock')==='out')>Out of stock</option><option value="low" @selected(request('stock')==='low')>Low stock</option><option value="healthy" @selected(request('stock')==='healthy')>Healthy</option></select><button>Filter Inventory</button><a href="{{route('vendor.inventory')}}">Reset</a></form>
+<div class="table-wrap"><table><thead><tr><th>Product</th><th>SKU</th><th>Available</th><th>Stock Status</th><th>Listing Status</th><th>Action</th></tr></thead><tbody>
+@forelse($products as $p)
+@php $level=(float)$p->stock<=0?'out':((float)$p->stock<=10?'low':'ok'); @endphp
+<tr><td><span class="name">{{IlluminateSupportStr::limit($p->name,42)}}</span><span class="muted">Product #{{$p->id}}</span></td><td>{{$p->sku}}</td><td class="stock {{$level}}">{{$p->stock}}</td><td><span class="badge {{$level}}">{{$level==='out'?'Out of stock':($level==='low'?'Low stock':'Healthy')}}</span></td><td><span class="badge">{{$p->status}}</span></td><td><a class="edit" href="{{route('vendor.products.edit',$p->id)}}">Edit stock →</a></td></tr>
+@empty<tr><td colspan="6">No inventory items found.</td></tr>@endforelse
+</tbody></table></div><div style="margin-top:14px">{{$products->links()}}</div>
+</section>
+</div></div>
+@endsection
