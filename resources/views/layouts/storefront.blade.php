@@ -1,15 +1,3 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name', 'Chacha Prime'))</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body>
-    @include('storefront.partials.header')
-    <main>@yield('content')</main>
-    @include('storefront.partials.footer')
-</body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>@yield('title','Chacha Prime')</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f5f6f8;color:#111}a{color:inherit}.top{background:#111;color:#fff;padding:14px 5%;display:flex;justify-content:space-between}.nav{background:#fff;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e8e8e8}.brand{font-weight:800;font-size:22px}.navlinks{display:flex;gap:22px}.auth-shell{min-height:75vh;display:grid;place-items:center;padding:50px 20px}.auth-card{width:min(460px,100%);background:#fff;padding:42px;border-radius:24px;box-shadow:0 20px 60px #00000012}.eyebrow{font-size:11px;letter-spacing:2px;font-weight:800}.auth-card h1{font-size:36px;margin:12px 0}.auth-card p{color:#69707d;line-height:1.6}.auth-card form{display:grid;gap:16px;margin-top:24px}.auth-card label{font-size:13px;font-weight:700;display:grid;gap:8px}.auth-card input{width:100%;padding:14px 15px;border:1px solid #dfe2e7;border-radius:12px;font-size:15px}.button{border:0;border-radius:12px;padding:15px 18px;font-weight:800;cursor:pointer}.button-dark{background:#111;color:#fff}.notice{padding:12px 14px;border-radius:10px;margin-top:18px;font-size:13px}.notice.error{background:#fff0f0;color:#a11}.notice.success{background:#effbf2;color:#17652a}.auth-foot{margin-top:24px}.dashboard-shell{padding:60px 5%;max-width:1400px;margin:auto}.dashboard-hero{background:#111;color:#fff;border-radius:28px;padding:42px}.dashboard-hero p{color:#c6c9cf}.dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:22px}.dashboard-card{background:#fff;border:1px solid #e9eaed;border-radius:20px;padding:24px}.dashboard-card span,.dashboard-card small{display:block;color:#707782}.dashboard-card strong{display:block;font-size:30px;margin:12px 0}@media(max-width:800px){.dashboard-grid{grid-template-columns:1fr 1fr}.navlinks{display:none}}@media(max-width:520px){.dashboard-grid{grid-template-columns:1fr}.auth-card{padding:28px}}
+</style></head><body><div class="top"><span>Chacha Prime Marketplace</span><span>Secure Commerce</span></div><nav class="nav"><a class="brand" href="{{ route('home') }}">CHACHA PRIME</a><div class="navlinks"><a href="{{ route('auth.login') }}">Sign in</a><a href="{{ route('auth.register') }}">Register</a><a href="{{ route('vendor.register') }}">Sell with us</a></div></nav>@yield('content')</body></html>
