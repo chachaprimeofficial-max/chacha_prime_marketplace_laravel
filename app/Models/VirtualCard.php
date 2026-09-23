@@ -1,6 +1,6 @@
 <?php
-namespace AppModels;
-use IlluminateDatabaseEloquentModel;
+namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
 class VirtualCard extends Model {
  protected $fillable=['user_id','card_token','display_number','last4','expiry_month','expiry_year','status','issued_at'];
  protected $hidden=['card_token'];
