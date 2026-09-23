@@ -107,6 +107,8 @@ Route::middleware(['auth','role:super_admin,admin,staff'])->prefix('admin')->nam
  Route::get('/staff',[AdminStaffController::class,'index'])->name('staff');
  Route::get('/audit-logs',[AdminAuditLogController::class,'index'])->name('audit-logs');
  Route::get('/support',[AdminSupportController::class,'index'])->name('support');
+ Route::get('/ai-copilot',[AdminSupportController::class,'aiCopilot'])->name('ai-copilot');
+ Route::post('/ai-copilot/ask',[AdminSupportController::class,'aiCopilotAsk'])->middleware('throttle:20,1')->name('ai-copilot.ask');
  Route::get('/support/{id}',[AdminSupportController::class,'show'])->name('support.thread');
  Route::post('/support/{id}/message',[AdminSupportController::class,'message'])->name('support.message');
  Route::post('/support/{id}/status',[AdminSupportController::class,'status'])->name('support.status');
