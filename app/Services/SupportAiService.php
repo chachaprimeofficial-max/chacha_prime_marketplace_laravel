@@ -30,6 +30,17 @@ class SupportAiService
             $conversation = DB::table('support_conversations')->where('id', $conversationId)->first();
         } else {
             $conversationId = (int) $conversation->id;
+            if (in_array($conversation->status, ['open','pending'], true)) {
+                $this->support->addMessage($conversationId, $user->id, 'customer', $message);
+                return [
+                    'answer' => 'Your case is already with our human support team. Please continue in Support Center so the assigned agent can reply there.',
+                    'escalate' => true,
+                    'department' => $conversation->department ?: 'customer_support',
+                    'priority' => $conversation->priority ?: 'normal',
+                    'reason' => 'Existing human support case is active.',
+                    'conversation_id' => $conversationId,
+                ];
+            }
         }
 
         $this->support->addMessage($conversationId, $user->id, 'customer', $message);
