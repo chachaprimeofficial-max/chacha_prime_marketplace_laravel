@@ -73,6 +73,7 @@ Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->gr
  Route::post('/live-commerce/{id}/pin',[VendorController::class,'pinLiveProduct'])->name('live-commerce.pin');
  Route::delete('/live-commerce/{id}/pin/{productId}',[VendorController::class,'unpinLiveProduct'])->name('live-commerce.unpin');
  Route::get('/ai',[VendorController::class,'ai'])->name('ai');
+ Route::post('/ai/product-builder',[VendorController::class,'aiProductBuilder'])->middleware('throttle:10,1')->name('ai.product-builder');
  Route::get('/payouts',[VendorController::class,'payouts'])->name('payouts');
  Route::post('/payouts',[VendorController::class,'requestPayout'])->name('payouts.request');
  Route::get('/returns',[VendorController::class,'returns'])->name('returns');
@@ -91,6 +92,7 @@ Route::middleware(['auth','role:super_admin,admin,staff'])->prefix('admin')->nam
  Route::post('/subscription-plans',[AdminController::class,'storeSubscriptionPlan'])->name('subscription-plans.store');
  Route::post('/subscriptions/assign',[AdminController::class,'assignSubscription'])->name('subscriptions.assign');
  Route::post('/ai-category-builder',[AdminController::class,'categoryAiBuilder'])->middleware('throttle:10,1')->name('ai-category-builder');
+ Route::post('/ai-category-builder/save',[AdminController::class,'saveAiCategory'])->name('ai-category-builder.save');
  Route::post('/label-sheet',[AdminController::class,'labelSheet'])->name('label-sheet');
  Route::post('/catalog-import',[AdminController::class,'importCatalog'])->name('catalog-import');
  Route::post('/ai-product-builder',[AdminController::class,'aiProductBuilder'])->middleware('throttle:10,1')->name('ai-product-builder');
