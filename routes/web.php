@@ -3,8 +3,14 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminCommerceController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\StorefrontController;
 use Illuminate\Support\Facades\Route;
-Route::get('/',fn()=>view('storefront.home'))->name('home');
+Route::get('/',[StorefrontController::class,'home'])->name('home');
+Route::get('/shop',[StorefrontController::class,'shop'])->name('shop');
+Route::get('/product/{id}',[StorefrontController::class,'product'])->name('product');
+Route::get('/cart',[StorefrontController::class,'cart'])->name('cart');
+Route::post('/cart/{id}',[StorefrontController::class,'addToCart'])->name('cart.add');
+Route::post('/cart/{id}/remove',[StorefrontController::class,'removeFromCart'])->name('cart.remove');
 Route::get('/health',fn()=>response()->json(['status'=>'ok','application'=>config('app.name'),'version'=>app()->version()]))->name('health');
 Route::prefix('auth')->name('auth.')->group(function(){
  Route::get('/login',[AuthController::class,'showLogin'])->name('login');
