@@ -23,6 +23,15 @@ class AuthController extends Controller {
         session(['pending_auth_user'=>$user->id,'show_totp_setup'=>true]);
         return redirect()->route('auth.otp')->with('success','Verification code sent to your email.');
     }
+    public function loginWithOtp(Request $request){
+        $data=$request->validate(['email'=>'required|email']);
+        $user=User::where('email',$data['email'])->first();
+        if(!$user || in_array($user->status,['blocked','suspended'])) return back()->withErrors(['email'=>'If the account is available, a verification code will be sent.']);
+        $this->sendOtp($user);
+        session(['pending_auth_user'=>$user->id]);
+        return redirect()->route('auth.otp')->with('success','Verification code sent to your email.');
+    }
+
     public function login(Request $request){
         $data=$request->validate(['email'=>'required|email','password'=>'required|string']);
         $user=User::where('email',$data['email'])->first();
