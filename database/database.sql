@@ -3,7 +3,7 @@
 CREATE DATABASE IF NOT EXISTS chacha_prime CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE chacha_prime;
 SET FOREIGN_KEY_CHECKS=0;
-CREATE TABLE IF NOT EXISTS users (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,name VARCHAR(120) NOT NULL,email VARCHAR(190) NOT NULL UNIQUE,password VARCHAR(255) NOT NULL,role ENUM('super_admin','admin','vendor','b2b_customer','customer','affiliate','courier','streamer') NOT NULL DEFAULT 'customer',status ENUM('active','pending','suspended','blocked') NOT NULL DEFAULT 'pending',email_verified_at TIMESTAMP NULL,two_factor_enabled TINYINT(1) NOT NULL DEFAULT 1,totp_secret TEXT NULL,phone VARCHAR(40),avatar VARCHAR(500),locale VARCHAR(10) DEFAULT 'en',created_at TIMESTAMP NULL,updated_at TIMESTAMP NULL,INDEX(role,status)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS users (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,name VARCHAR(120) NOT NULL,email VARCHAR(190) NOT NULL UNIQUE,password VARCHAR(255) NOT NULL,role ENUM('super_admin','admin','staff','vendor','b2b_customer','customer','affiliate','courier','streamer') NOT NULL DEFAULT 'customer',status ENUM('active','pending','suspended','blocked') NOT NULL DEFAULT 'pending',email_verified_at TIMESTAMP NULL,two_factor_enabled TINYINT(1) NOT NULL DEFAULT 1,totp_secret TEXT NULL,phone VARCHAR(40),avatar VARCHAR(500),locale VARCHAR(10) DEFAULT 'en',created_at TIMESTAMP NULL,updated_at TIMESTAMP NULL,INDEX(role,status)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS roles (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,name VARCHAR(80) UNIQUE NOT NULL,description VARCHAR(255),created_at TIMESTAMP NULL,updated_at TIMESTAMP NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS permissions (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,name VARCHAR(120) UNIQUE NOT NULL,description VARCHAR(255),created_at TIMESTAMP NULL,updated_at TIMESTAMP NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS role_permissions (role_id BIGINT UNSIGNED NOT NULL,permission_id BIGINT UNSIGNED NOT NULL,PRIMARY KEY(role_id,permission_id),FOREIGN KEY(role_id) REFERENCES roles(id) ON DELETE CASCADE,FOREIGN KEY(permission_id) REFERENCES permissions(id) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -41,7 +41,29 @@ CREATE TABLE IF NOT EXISTS notifications (id BIGINT UNSIGNED AUTO_INCREMENT PRIM
 CREATE TABLE IF NOT EXISTS ai_logs (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,user_id BIGINT UNSIGNED NULL,context VARCHAR(40) NOT NULL,provider VARCHAR(40) DEFAULT 'gemini',model VARCHAR(100),prompt LONGTEXT,response LONGTEXT,tokens_used INT UNSIGNED,created_at TIMESTAMP NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS audit_logs (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,user_id BIGINT UNSIGNED NULL,action VARCHAR(120) NOT NULL,entity_type VARCHAR(120),entity_id BIGINT UNSIGNED,ip_address VARCHAR(45),user_agent TEXT,metadata JSON,created_at TIMESTAMP NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS pages (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,slug VARCHAR(180) UNIQUE NOT NULL,title VARCHAR(220) NOT NULL,content LONGTEXT,status TINYINT(1) DEFAULT 1,created_at TIMESTAMP NULL,updated_at TIMESTAMP NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-INSERT IGNORE INTO roles(name,description) VALUES ('super_admin','Full platform control'),('admin','Administrative staff'),('vendor','Marketplace seller'),('b2b_customer','Business buyer'),('customer','Retail customer'),('affiliate','Affiliate partner'),('courier','Delivery staff'),('streamer','Live commerce streamer');
+INSERT IGNORE INTO roles(name,description) VALUES ('super_admin','Full platform control'),('admin','Administrative staff'),('staff','Staff member'),('vendor','Marketplace seller'),('b2b_customer','Business buyer'),('customer','Retail customer'),('affiliate','Affiliate partner'),('courier','Delivery staff'),('streamer','Live commerce streamer');
+INSERT IGNORE INTO permissions(name,description) VALUES
+('dashboard.view','View admin dashboard'),
+('users.view','View users'),
+('users.manage','Manage users'),
+('vendors.manage','Manage vendors'),
+('products.manage','Manage products'),
+('categories.manage','Manage categories'),
+('orders.view','View orders'),
+('orders.manage','Manage orders'),
+('payments.view','View payments'),
+('payments.manage','Manage payments'),
+('wallets.manage','Manage wallets'),
+('cards.manage','Manage virtual cards'),
+('staff.manage','Manage staff'),
+('permissions.manage','Manage role permissions'),
+('modules.manage','Manage platform modules'),
+('audit.view','View audit logs');
+
+INSERT IGNORE INTO role_permissions(role_id,permission_id)
+SELECT r.id,p.id FROM roles r CROSS JOIN permissions p WHERE r.name='staff' AND p.name IN
+('dashboard.view','users.view','vendors.manage','products.manage','categories.manage','orders.view','payments.view','modules.manage','audit.view');
+
 INSERT IGNORE INTO currencies(code,name,symbol,rate_to_base,source) VALUES ('USD','US Dollar','$',1,'manual'),('PKR','Pakistani Rupee','Rs',1,'manual'),('CNY','Chinese Yuan','¥',1,'manual'),('AED','UAE Dirham','د.إ',1,'manual'),('EUR','Euro','€',1,'manual');
 INSERT IGNORE INTO payment_methods(code,name,type,enabled) VALUES ('pingpong','PingPong','gateway',0),('lianlianpay','LianLianPay','gateway',0),('worldfirst','WorldFirst','gateway',0),('alipay','Alipay','gateway',0),('wechat_pay','WeChat Pay','gateway',0),('visa','Visa','gateway',0),('mastercard','Mastercard','gateway',0),('amex','American Express','gateway',0),('paypal','PayPal','gateway',0),('easypaisa','Easypaisa','gateway',0),('jazzcash','JazzCash','gateway',0),('raast','Raast','gateway',0),('bank_transfer','Bank Transfer','bank',0),('cod','Cash on Delivery','cod',0);
 INSERT IGNORE INTO shipping_methods(code,name,provider,mode,enabled) VALUES ('fedex','FedEx','FedEx','api',0),('ups','UPS','UPS','api',0),('usps','USPS','USPS','api',0),('dhl','DHL','DHL','api',0),('tcs','TCS','TCS','api',0),('leopards','Leopards','Leopards','api',0),('postex','PostEx','PostEx','api',0),('sf_express','SF Express','SF Express','api',0),('jt','J&T','J&T','api',0),('manual','Manual Shipping','Internal','manual',1);
