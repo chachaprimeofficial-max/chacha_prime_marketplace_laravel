@@ -11,14 +11,16 @@
 </div>
 <div class="dashboard-two">
 <section class="panel">
-<h2>CSV / Feed Import</h2><p style="color:#64748b;font-size:11px">Foundation for bulk catalog import. Processing can be moved to Laravel queues for large files.</p>
-<form method="POST" action="#" enctype="multipart/form-data">@csrf
-<input type="file" name="file" accept=".csv,.xlsx,.xml,.json" disabled>
-<button disabled style="margin-top:10px;padding:10px 14px;border:0;border-radius:9px;background:#cbd5e1">Import engine next</button>
+<h2>CSV / Feed Import</h2><p style="color:#64748b;font-size:11px">Foundation for bulk catalog import. CSV import is live. Required columns: name, vendor_id; optional: category_id, brand_id, sku, retail_price, cost_price, currency, stock, description.</p>
+<form method="POST" action="{{route('admin.catalog-import')}}" enctype="multipart/form-data">@csrf
+<input type="file" name="file" accept=".csv,.txt" required>
+<button style="margin-top:10px;padding:10px 14px;border:0;border-radius:9px;background:#111827;color:#fff">Import CSV</button>
 </form>
 <div style="margin-top:18px;padding:12px;background:#f8fafc;border-radius:10px;font-size:11px">Planned mapping: SKU → Product ID → Category → Brand → prices → stock → images → attributes. Duplicate SKU detection and row-level error reports will be included.</div>
 </section>
 <section class="panel">
+<h2>AI Product Builder</h2><form id="aiProductForm" style="display:grid;gap:8px"><textarea id="aiInput" rows="4" placeholder="Example: Samsung Galaxy A55 5G 256GB Black..."></textarea><button type="submit" style="padding:10px;border:0;border-radius:9px;background:#111827;color:#fff">Generate Product Content</button></form><pre id="aiResult" style="white-space:pre-wrap;font-size:10px;max-height:180px;overflow:auto"></pre>
+</section><section class="panel">
 <h2>Subscription Plans</h2>
 <form method="POST" action="{{route('admin.subscription-plans.store')}}" style="display:grid;gap:8px">@csrf
 <input name="name" placeholder="Plan name" required><select name="audience"><option value="vendor">Vendor</option><option value="b2b_customer">B2B Customer</option><option value="customer">Customer</option></select>
@@ -32,4 +34,5 @@
 <h2>Import History</h2><div class="table-wrap"><table><thead><tr><th>ID</th><th>Source</th><th>Status</th><th>Rows</th><th>Imported</th><th>Failed</th></tr></thead><tbody>
 @forelse($imports as $i)<tr><td>#{{$i->id}}</td><td>{{$i->source_type}}</td><td><span class="status">{{$i->status}}</span></td><td>{{$i->total_rows}}</td><td>{{$i->imported_rows}}</td><td>{{$i->failed_rows}}</td></tr>@empty<tr><td colspan="6">No imports yet.</td></tr>@endforelse
 </tbody></table></div>{{$imports->links()}}</div>
+<script>document.getElementById("aiProductForm")?.addEventListener("submit",async e=>{e.preventDefault();let out=document.getElementById("aiResult");out.textContent="Generating...";let r=await fetch("{{route("admin.ai-product-builder")}}",{method:"POST",headers:{"Content-Type":"application/json","X-CSRF-TOKEN":"{{csrf_token()}}"},body:JSON.stringify({input:document.getElementById("aiInput").value})});let j=await r.json();out.textContent=JSON.stringify(j.data||j.raw||j,null,2)});</script>
 @endsection
