@@ -46,9 +46,10 @@ class AuthController extends Controller {
         $otp=$user->otpCodes()->where('purpose','login')->whereNull('consumed_at')->where('expires_at','>',now())->latest()->first();
         if(!$otp || !Hash::check($request->code,$otp->code_hash)) return back()->withErrors(['code'=>'Invalid or expired verification code.']);
         $otp->update(['consumed_at'=>now()]);
+        if(!$user->totp_secret){ $secret=$totp->generateSecret(); $user->update(['totp_secret'=>encrypt($secret),'two_factor_enabled'=>true]); session(['show_totp_setup'=>true]); }
         session(['pending_totp_user'=>$user->id]); return redirect()->route('auth.totp');
     }
-    public function totp(){abort_unless(session('pending_totp_user'),403);$user=User::findOrFail(session('pending_totp_user'));$setup=null;if(session('show_totp_setup')){$secret=decrypt($user->totp_secret);$setup=['secret'=>$secret,'uri'=>app(TotpService::class)->uri($user->email,$secret)];}return view('auth.totp',compact('setup'));}
+    public function totp(){abort_unless(session('pending_totp_user'),403);$user=User::findOrFail(session('pending_totp_user'));$setup=null;if(!$user->totp_secret){$secret=app(TotpService::class)->generateSecret();$user->update(['totp_secret'=>encrypt($secret),'two_factor_enabled'=>true]);session(['show_totp_setup'=>true]);}if(session('show_totp_setup')){$secret=decrypt($user->totp_secret);$setup=['secret'=>$secret,'uri'=>app(TotpService::class)->uri($user->email,$secret)];}return view('auth.totp',compact('setup'));}
     public function verifyTotp(Request $request,TotpService $totp){
         $request->validate(['code'=>'required|digits:6']); $user=User::findOrFail(session('pending_totp_user'));
         if(!$user->totp_secret || !$totp->verify(decrypt($user->totp_secret),$request->code)) return back()->withErrors(['code'=>'Invalid authenticator code.']);
