@@ -62,6 +62,22 @@ class AdminController extends Controller
         ];
         $m=$map[$module]; return view('admin.module',['module'=>$module,'title'=>$m['title'],'rows'=>DB::table($m['table'])->latest('id')->paginate(30)]);
     }
+    public function storeModule(Request $request,string $module){
+        $schemas=[
+            'brands'=>['table'=>'brands','fields'=>['name'=>'required|string|max:150','logo'=>'nullable|string|max:500']],
+            'coupons'=>['table'=>'coupons','fields'=>['code'=>'required|string|max:80','type'=>'required|string|max:20','value'=>'required|numeric|min:0','min_order'=>'nullable|numeric|min:0','max_discount'=>'nullable|numeric|min:0']],
+            'currencies'=>['table'=>'currencies','fields'=>['code'=>'required|string|size:3','name'=>'required|string|max:80','symbol'=>'nullable|string|max:10','rate_to_base'=>'required|numeric|min:0']],
+            'payment-methods'=>['table'=>'payment_methods','fields'=>['code'=>'required|string|max:80','name'=>'required|string|max:120','type'=>'required|string|max:30']],
+            'shipping'=>['table'=>'shipping_methods','fields'=>['code'=>'required|string|max:80','name'=>'required|string|max:120','provider'=>'nullable|string|max:100','mode'=>'required|string|max:20']],
+            'pages'=>['table'=>'pages','fields'=>['slug'=>'required|string|max:180','title'=>'required|string|max:220','content'=>'nullable|string']],
+        ];
+        abort_unless(isset($schemas[$module]),404); $schema=$schemas[$module];
+        $data=$request->validate($schema['fields']); $data['created_at']=now(); $data['updated_at']=now();
+        if(in_array($module,['brands','coupons','currencies','payment-methods','shipping','pages'],true)) $data['enabled']= $module==='pages'?null:1;
+        if($module==='pages') $data['status']=1;
+        DB::table($schema['table'])->insert($data); return back()->with('success',$schema['table'].' record created.');
+    }
+
     public function toggle(Request $request,string $module,int $id){
         $tables=['brands'=>'brands','reviews'=>'reviews','coupons'=>'coupons','shipping'=>'shipping_methods','currencies'=>'currencies','payment-methods'=>'payment_methods','pages'=>'pages','group-buying'=>'group_buying_campaigns','live-commerce'=>'live_streams'];
         abort_unless(isset($tables[$module]),404); $table=$tables[$module]; $row=DB::table($table)->where('id',$id)->first(); abort_unless($row,404);
