@@ -1,4 +1,4 @@
-@extends('layouts.storefront')
+@extends('layouts.role-dashboard')
 @section('title',$role.' — Chacha Prime')
 @push('styles')
 <style>
