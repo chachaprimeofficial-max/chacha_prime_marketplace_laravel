@@ -41,7 +41,7 @@ class AdminAuditLogController extends Controller
         $logs = $query->paginate(40)->withQueryString();
 
         $actors = DB::table('users')
-            ->whereIn('role', ['super_admin', 'admin'])
+            ->whereIn('role', ['super_admin', 'admin', 'staff'])
             ->orderBy('name')
             ->get(['id', 'name', 'email']);
 
