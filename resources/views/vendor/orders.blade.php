@@ -1,0 +1,3 @@
+@extends('layouts.storefront')
+@section('title','Vendor Orders')
+@section('content')<div class="container"><h1>Orders</h1><div class="panel"><div class="table-wrap"><table><tr><th>Order</th><th>Total</th><th>Status</th><th>Update</th></tr>@foreach($orders as $o)<tr><td>#{{$o->id}}</td><td>{{$o->total_amount}}</td><td>{{$o->status}}</td><td><form method="POST" action="{{route('vendor.orders.update',$o->id)}}">@csrf<select name="status"><option>processing</option><option>shipped</option><option>delivered</option><option>cancelled</option></select><button class="button">Save</button></form></td></tr>@endforeach</table></div>{{$orders->links()}}</div></div>@endsection
