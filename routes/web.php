@@ -33,6 +33,7 @@ Route::get('/health',fn()=>response()->json(['status'=>'ok','application'=>confi
 Route::prefix('auth')->name('auth.')->group(function(){
  Route::get('/login',[AuthController::class,'showLogin'])->name('login');
  Route::post('/login',[AuthController::class,'login'])->name('login.submit');
+ Route::post('/login/otp',[AuthController::class,'loginWithOtp'])->name('otp.login');
  Route::get('/register',[AuthController::class,'showRegister'])->name('register');
  Route::post('/register',[AuthController::class,'register'])->name('register.submit');
  Route::get('/otp',[AuthController::class,'otp'])->name('otp');
