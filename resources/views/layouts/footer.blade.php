@@ -65,6 +65,9 @@ $footerLinks = [
                 <div class="cp-brand-card"><svg viewBox="0 0 135 36" aria-label="easypaisa"><text x="67" y="24" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="800" fill="#1B1B1B">easypaisa</text><path d="M113 8c7 3 9 10 5 17" fill="none" stroke="#72BF44" stroke-width="4" stroke-linecap="round"/></svg></div>
                 <div class="cp-brand-card"><svg viewBox="0 0 135 36" aria-label="JazzCash"><circle cx="22" cy="18" r="13" fill="#E31B23"/><text x="22" y="23" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="900" fill="#FFD200">J</text><text x="42" y="24" font-family="Arial,sans-serif" font-size="16" font-weight="900" fill="#E31B23">JazzCash</text></svg></div>
                 <div class="cp-brand-card"><svg viewBox="0 0 110 36" aria-label="RAAST"><text x="55" y="24" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="900" fill="#1261A0">RAAST</text></svg></div>
+                <div class="cp-brand-card"><svg viewBox="0 0 120 36" aria-label="UnionPay"><rect x="5" y="5" width="110" height="26" rx="3" fill="#e21836"/><text x="60" y="23" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="900" fill="#fff">UNIONPAY</text></svg></div>
+                <div class="cp-brand-card"><svg viewBox="0 0 120 36" aria-label="Apple Pay"><rect x="5" y="5" width="110" height="26" rx="5" fill="#111"/><text x="60" y="23" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="800" fill="#fff">Apple Pay</text></svg></div>
+                <div class="cp-brand-card"><svg viewBox="0 0 120 36" aria-label="Google Pay"><text x="60" y="23" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="900" fill="#4285F4">G</text><text x="74" y="23" font-family="Arial,sans-serif" font-size="12" font-weight="700" fill="#444">Pay</text></svg></div>
             </div>
         </div>
     </div>
@@ -79,6 +82,8 @@ $footerLinks = [
                 <div class="cp-brand-card cp-courier-blueex"><span class="courier-mark">blueEX</span><small>eCommerce Logistics</small></div>
                 <div class="cp-brand-card cp-courier-postex"><span class="courier-mark">PostEx.</span><small>Delivery &amp; fintech</small></div>
                 <div class="cp-brand-card cp-courier-trax"><span class="courier-mark">TRAX</span><small>Logistics</small></div>
+                <div class="cp-brand-card cp-courier-mp"><span class="courier-mark">M&amp;P</span><small>Express Logistics</small></div>
+                <div class="cp-brand-card cp-courier-fedex"><span class="courier-mark">FedEx</span><small>Express</small></div>
             </div>
         </div>
     </div>
