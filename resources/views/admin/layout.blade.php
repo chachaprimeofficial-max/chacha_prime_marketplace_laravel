@@ -39,6 +39,7 @@
 <a href="{{route('admin.module','pages')}}">▤ <span>CMS Pages</span></a>
 <a href="{{route('admin.module','ai-logs')}}">✦ <span>AI Activity</span></a>
 <a class="{{request()->routeIs('admin.support*')?'active':''}}" href="{{route('admin.support')}}">✉ <span>Support Center</span></a>
+<a class="{{request()->routeIs('admin.ai-copilot*')?'active':''}}" href="{{route('admin.ai-copilot')}}">✦ <span>AI Copilot</span></a>
 <a href="{{route('admin.audit-logs')}}">◌ <span>Audit Logs</span></a>
 <a class="store" href="{{route('home')}}">↗ <span>Open Storefront</span></a>
 </aside>
