@@ -11,7 +11,7 @@
 <body>
 <div class="admin">
 <aside class="side" id="adminSidebar">
-<div class="brand"><small>CHACHA PRIME</small><strong>Admin Control Center</strong><span>MARKETPLACE HQ</span></div>
+<div class="brand"><a href="{{route('home')}}" style="display:block"><img src="{{asset('images/chacha-logo.svg')}}" alt="CHACHA 查查 Prime" style="width:185px;max-width:100%;height:48px;object-fit:contain;object-position:left center"></a><strong>Admin Control Center</strong><span>MARKETPLACE HQ</span></div>
 <div class="nav-title">Overview</div>
 <a class="{{request()->routeIs('admin.dashboard')?'active':''}}" href="{{route('admin.dashboard')}}">▦ <span>Dashboard</span></a>
 <div class="nav-title">Commerce</div>
