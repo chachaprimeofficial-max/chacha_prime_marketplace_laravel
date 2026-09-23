@@ -21,6 +21,9 @@ class SupportController extends Controller
             ->where('customer_id',$user->id)
             ->latest('last_message_at')->limit(30)->get();
 
+        if ($conversation) {
+            DB::table('support_messages')->where('conversation_id',$conversation->id)->whereIn('sender_role',['admin','ai'])->update(['read_at'=>now()]);
+        }
         $messages = $conversation ? app(SupportService::class)->messages((int)$conversation->id,120) : collect();
         $channels = app(SupportService::class)->channels();
 
@@ -72,6 +75,9 @@ class SupportController extends Controller
     {
         $vendor=Vendor::where('user_id',$request->user()->id)->firstOrFail();
         $supportConversation=$support->conversationForVendor($vendor->id);
+        if ($supportConversation) {
+            DB::table('support_messages')->where('conversation_id',$supportConversation->id)->where('sender_role','admin')->update(['read_at'=>now()]);
+        }
         $supportMessages=$supportConversation ? $support->messages((int)$supportConversation->id,120) : collect();
 
         $customerConversations=DB::table('support_conversations as c')
@@ -84,6 +90,9 @@ class SupportController extends Controller
         $customerConversation=$selectedId
             ? DB::table('support_conversations')->where('id',$selectedId)->where('vendor_id',$vendor->id)->where('type','customer_vendor')->first()
             : $customerConversations->first();
+        if ($customerConversation) {
+            DB::table('support_messages')->where('conversation_id',$customerConversation->id)->where('sender_role','customer')->update(['read_at'=>now()]);
+        }
         $customerMessages=$customerConversation ? $support->messages((int)$customerConversation->id,120) : collect();
 
         return view('vendor.messages',compact('vendor','supportConversation','supportMessages','customerConversations','customerConversation','customerMessages'));
