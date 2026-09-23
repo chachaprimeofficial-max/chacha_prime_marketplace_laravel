@@ -8,6 +8,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Services\AuditLogService;
 
 class AdminController extends Controller
 {
@@ -34,19 +35,19 @@ class AdminController extends Controller
 
     public function updateUser(Request $request,User $user){
         $data=$request->validate(['status'=>'required|in:active,pending,blocked,suspended','role'=>'required|in:super_admin,admin,vendor,b2b_customer,customer,affiliate,courier,streamer']);
-        $user->update($data); return back()->with('success','User updated.');
+        $before=$user->only(['status','role']); $user->update($data); app(AuditLogService::class)->log('user.updated','User',$user->id,['before'=>$before,'after'=>$data]); return back()->with('success','User updated.');
     }
     public function updateVendor(Request $request,Vendor $vendor){
         $data=$request->validate(['status'=>'required|in:pending,approved,suspended,rejected','verification_status'=>'required|in:pending,verified,rejected']);
-        $vendor->update($data); if($data['status']==='approved') $vendor->user?->update(['status'=>'active','role'=>'vendor']); return back()->with('success','Vendor updated.');
+        $before=$vendor->only(['status','verification_status']); $vendor->update($data); app(AuditLogService::class)->log('vendor.updated','Vendor',$vendor->id,['before'=>$before,'after'=>$data]); if($data['status']==='approved') $vendor->user?->update(['status'=>'active','role'=>'vendor']); return back()->with('success','Vendor updated.');
     }
     public function storeProduct(Request $request){
         $data=$request->validate(['vendor_id'=>'required|exists:vendors,id','category_id'=>'nullable|exists:categories,id','brand_id'=>'nullable|exists:brands,id','name'=>'required|string|max:220','retail_price'=>'required|numeric|min:0','cost_price'=>'nullable|numeric|min:0','currency'=>'required|string|size:3','stock'=>'required|numeric|min:0','description'=>'nullable|string']);
-        $data['slug']=Str::slug($data['name']).'-'.Str::lower(Str::random(6)); $data['sku']='CP-'.strtoupper(Str::random(8)); $data['status']='pending'; $data['stock_status']=$data['stock']>0?'in_stock':'out_of_stock'; Product::create($data); return back()->with('success','Product created.');
+        $data['slug']=Str::slug($data['name']).'-'.Str::lower(Str::random(6)); $data['sku']='CP-'.strtoupper(Str::random(8)); $data['status']='pending'; $data['stock_status']=$data['stock']>0?'in_stock':'out_of_stock'; $product=Product::create($data); app(AuditLogService::class)->log('product.created','Product',$product->id,['name'=>$product->name,'vendor_id'=>$product->vendor_id,'status'=>$product->status]); return back()->with('success','Product created.');
     }
     public function storeCategory(Request $request){
         $data=$request->validate(['name'=>'required|string|max:150','parent_id'=>'nullable|exists:categories,id','description'=>'nullable|string']);
-        $data['slug']=Str::slug($data['name']).'-'.Str::lower(Str::random(5)); $data['status']=1; Category::create($data); return back()->with('success','Category created.');
+        $data['slug']=Str::slug($data['name']).'-'.Str::lower(Str::random(5)); $data['status']=1; $category=Category::create($data); app(AuditLogService::class)->log('category.created','Category',$category->id,['name'=>$category->name,'parent_id'=>$category->parent_id]); return back()->with('success','Category created.');
     }
 
     public function module($module){
@@ -75,7 +76,7 @@ class AdminController extends Controller
         $data=$request->validate($schema['fields']); $data['created_at']=now(); $data['updated_at']=now();
         if(in_array($module,['brands','coupons','currencies','payment-methods','shipping','pages'],true)) $data['enabled']= $module==='pages'?null:1;
         if($module==='pages') $data['status']=1;
-        DB::table($schema['table'])->insert($data); return back()->with('success',$schema['table'].' record created.');
+        $id=DB::table($schema['table'])->insertGetId($data); app(AuditLogService::class)->log('module.created',$schema['table'],$id,['module'=>$module,'data'=>$data]); return back()->with('success',$schema['table'].' record created.');
     }
 
     public function updateModule(Request $request,string $module,int $id){
@@ -88,17 +89,17 @@ class AdminController extends Controller
             'pages'=>['table'=>'pages','fields'=>['slug'=>'required|string|max:180','title'=>'required|string|max:220','content'=>'nullable|string']],
         ];
         abort_unless(isset($schemas[$module]),404); $schema=$schemas[$module]; $data=$request->validate($schema['fields']); $data['updated_at']=now();
-        DB::table($schema['table'])->where('id',$id)->update($data); return back()->with('success','Record updated.');
+        $before=DB::table($schema['table'])->where('id',$id)->first(); DB::table($schema['table'])->where('id',$id)->update($data); app(AuditLogService::class)->log('module.updated',$schema['table'],$id,['module'=>$module,'before'=>$before ? (array)$before : [],'after'=>$data]); return back()->with('success','Record updated.');
     }
     public function deleteModule(string $module,int $id){
         $tables=['brands'=>'brands','coupons'=>'coupons','currencies'=>'currencies','payment-methods'=>'payment_methods','shipping'=>'shipping_methods','pages'=>'pages'];
-        abort_unless(isset($tables[$module]),404); DB::table($tables[$module])->where('id',$id)->delete(); return back()->with('success','Record deleted.');
+        abort_unless(isset($tables[$module]),404); $before=DB::table($tables[$module])->where('id',$id)->first(); DB::table($tables[$module])->where('id',$id)->delete(); app(AuditLogService::class)->log('module.deleted',$tables[$module],$id,['module'=>$module,'before'=>$before ? (array)$before : []]); return back()->with('success','Record deleted.');
     }
     public function toggle(Request $request,string $module,int $id){
         $tables=['brands'=>'brands','reviews'=>'reviews','coupons'=>'coupons','shipping'=>'shipping_methods','currencies'=>'currencies','payment-methods'=>'payment_methods','pages'=>'pages','group-buying'=>'group_buying_campaigns','live-commerce'=>'live_streams'];
         abort_unless(isset($tables[$module]),404); $table=$tables[$module]; $row=DB::table($table)->where('id',$id)->first(); abort_unless($row,404);
         $current=property_exists($row,'enabled')?(int)$row->enabled:(property_exists($row,'status')?$row->status:1);
         $next=($current===1||$current==='active'||$current==='published')?0:1;
-        $field=property_exists($row,'enabled')?'enabled':'status'; DB::table($table)->where('id',$id)->update([$field=>$next,'updated_at'=>now()]); return back()->with('success','Status updated.');
+        $field=property_exists($row,'enabled')?'enabled':'status'; DB::table($table)->where('id',$id)->update([$field=>$next,'updated_at'=>now()]); app(AuditLogService::class)->log('module.toggled',$table,$id,['module'=>$module,'field'=>$field,'from'=>$current,'to'=>$next]); return back()->with('success','Status updated.');
     }
 }
