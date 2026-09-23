@@ -1,0 +1,1 @@
+@extends('layouts.storefront') @section('title','Wishlist') @section('content')<div class="container"><h1>Wishlist</h1><div class="panel">@forelse($items as $i)<div class="quick"><span>Product #{{$i->product_id}}</span><a class="button" href="{{route('product',$i->product_id)}}">View</a></div>@empty<p>Your wishlist is empty.</p>@endforelse</div></div>@endsection
