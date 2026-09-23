@@ -23,6 +23,11 @@ Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->gr
  Route::get('/products',[VendorController::class,'products'])->name('products');
  Route::post('/products',[VendorController::class,'storeProduct'])->name('products.store');
  Route::post('/products/{id}',[VendorController::class,'updateProduct'])->name('products.update');
+ Route::get('/products/{id}/edit',[VendorController::class,'editProduct'])->name('products.edit');
+ Route::delete('/products/{id}',[VendorController::class,'deleteProduct'])->name('products.delete');
+ Route::get('/pricing',[VendorController::class,'pricing'])->name('pricing');
+ Route::get('/inventory',[VendorController::class,'inventory'])->name('inventory');
+ Route::get('/analytics',[VendorController::class,'analytics'])->name('analytics');
  Route::get('/orders',[VendorController::class,'orders'])->name('orders');
  Route::post('/orders/{id}',[VendorController::class,'updateOrder'])->name('orders.update');
  Route::get('/wallet',[VendorController::class,'wallet'])->name('wallet');
