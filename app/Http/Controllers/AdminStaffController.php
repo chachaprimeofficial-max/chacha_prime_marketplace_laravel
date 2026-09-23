@@ -38,7 +38,7 @@ class AdminStaffController extends Controller
 
         $before=DB::table('role_permissions')->where('role_id',$roleId)->pluck('permission_id')->all(); DB::table('role_permissions')->where('role_id',$roleId)->delete();
         foreach($data['permissions']??[] as $permissionId){
-            DB::table('role_permissions')->insert(['role_id'=>$roleId,'permission_id'=>$permissionId,'created_at'=>now(),'updated_at'=>now()]);
+            DB::table('role_permissions')->insert(['role_id'=>$roleId,'permission_id'=>$permissionId]);
         }
         app(AuditLogService::class)->log('role.permissions.updated','Role',$roleId,['role'=>$role,'before'=>$before,'after'=>$data['permissions']??[]]); return back()->with('success','Permissions updated for the role.');
     }
