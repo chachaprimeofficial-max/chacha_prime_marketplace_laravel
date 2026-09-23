@@ -1,0 +1,5 @@
+@extends('layouts.storefront')
+@section('title','Customer Dashboard — Chacha Prime')
+@section('content')
+<section class="dashboard-shell"><div class="dashboard-hero"><span class="eyebrow">CUSTOMER</span><h1>Hello, {{ auth()->user()->name }}</h1><p>Manage orders, wallet, marketplace card, saved products and account security.</p></div><div class="dashboard-grid"><article class="dashboard-card"><span>Orders</span><strong>0</strong><small>Track purchases</small></article><article class="dashboard-card"><span>Wallet</span><strong>0.00</strong><small>Internal balance</small></article><article class="dashboard-card"><span>Wishlist</span><strong>0</strong><small>Saved products</small></article><article class="dashboard-card"><span>Security</span><strong>2FA</strong><small>Email OTP + TOTP</small></article></div></section>
+@endsection
