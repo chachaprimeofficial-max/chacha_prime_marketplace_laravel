@@ -2,6 +2,7 @@
 @section('title','Seller Center — Chacha Prime')
 @push('styles')
 <style>
+.cp-snapshot{display:grid;grid-template-columns:1fr 1fr;gap:9px}.cp-snapshot div{padding:13px;border:1px solid #e5e7eb;border-radius:11px}.cp-snapshot span{display:block;color:#64748b;font-size:11px}.cp-snapshot b{display:block;font-size:18px;margin-top:5px}
 /* Chacha Prime — premium seller center */
  .cp-seller-page{background:#f5f7fa;min-height:calc(100vh - 104px);padding:22px}
  .cp-seller-page-inner{max-width:1500px;margin:0 auto}
@@ -84,7 +85,7 @@
         <div class="cp-seller-stat"><span class="label">Low Stock</span><strong>{{number_format($stats['low_stock'])}}</strong><small>10 units or less</small></div>
       </section>
 
-      <div class="cp-seller-layout">
+      <section class="cp-seller-layout" style="margin-top:16px"><section class="cp-seller-card"><h2>Store performance</h2><p class="sub">Visual overview of your current catalog and operations.</p><div class="cp-seller-bars"><div class="cp-seller-bar-row"><div class="cp-seller-bar-label"><span>Published products</span><b>{{$stats['published']}} / {{$stats['products']}}</b></div><div class="cp-seller-bar"><i style="width:{{min(100,(int)$stats['products']>0?round($stats['published']/$stats['products']*100):0)}}%"></i></div></div><div class="cp-seller-bar-row"><div class="cp-seller-bar-label"><span>Healthy inventory</span><b>{{$stats['products']-$stats['low_stock']}} / {{$stats['products']}}</b></div><div class="cp-seller-bar"><i style="width:{{min(100,(int)$stats['products']>0?round(($stats['products']-$stats['low_stock'])/$stats['products']*100):0)}}%"></i></div></div><div class="cp-seller-bar-row"><div class="cp-seller-bar-label"><span>Orders</span><b>{{$stats['orders']}}</b></div><div class="cp-seller-bar"><i style="width:{{min(100,max(5,(int)$stats['orders']))}}%"></i></div></div></div></section><section class="cp-seller-card"><h2>Business snapshot</h2><p class="sub">Key numbers from your Seller Center.</p><div class="cp-snapshot"><div><span>Paid sales</span><b>{{$stats['sales']}}</b></div><div><span>Low stock</span><b>{{$stats['low_stock']}}</b></div><div><span>Orders</span><b>{{$stats['orders']}}</b></div><div><span>Products</span><b>{{$stats['products']}}</b></div></div></section></section><div class="cp-seller-layout">
         <section class="cp-seller-card">
           <h2>Seller operations</h2>
           <p class="sub">Everything you need to run your Chacha Prime store.</p>
