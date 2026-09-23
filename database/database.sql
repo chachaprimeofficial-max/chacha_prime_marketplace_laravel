@@ -43,6 +43,68 @@ CREATE TABLE IF NOT EXISTS settings (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY K
 CREATE TABLE IF NOT EXISTS otp_codes (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,user_id BIGINT UNSIGNED NOT NULL,purpose VARCHAR(50) NOT NULL,code_hash VARCHAR(255) NOT NULL,expires_at TIMESTAMP NOT NULL,consumed_at TIMESTAMP NULL,attempts TINYINT UNSIGNED DEFAULT 0,created_at TIMESTAMP NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS notifications (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,user_id BIGINT UNSIGNED NOT NULL,type VARCHAR(120) NOT NULL,title VARCHAR(180) NOT NULL,message TEXT NOT NULL,data JSON,read_at TIMESTAMP NULL,created_at TIMESTAMP NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS ai_logs (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,user_id BIGINT UNSIGNED NULL,context VARCHAR(40) NOT NULL,provider VARCHAR(40) DEFAULT 'gemini',model VARCHAR(100),prompt LONGTEXT,response LONGTEXT,tokens_used INT UNSIGNED,created_at TIMESTAMP NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS vendor_payouts (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ vendor_id BIGINT UNSIGNED NOT NULL,
+ wallet_id BIGINT UNSIGNED NULL,
+ amount DECIMAL(18,2) NOT NULL,
+ currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+ method VARCHAR(60) NULL,
+ destination VARCHAR(190) NULL,
+ status ENUM('requested','processing','paid','rejected','cancelled') NOT NULL DEFAULT 'requested',
+ notes TEXT NULL,
+ processed_by BIGINT UNSIGNED NULL,
+ processed_at TIMESTAMP NULL,
+ created_at TIMESTAMP NULL,
+ updated_at TIMESTAMP NULL,
+ INDEX idx_vendor_payouts_vendor_status (vendor_id,status),
+ CONSTRAINT fk_vendor_payouts_vendor FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE,
+ CONSTRAINT fk_vendor_payouts_wallet FOREIGN KEY (wallet_id) REFERENCES wallets(id) ON DELETE SET NULL,
+ CONSTRAINT fk_vendor_payouts_processor FOREIGN KEY (processed_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS customer_messages (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ vendor_id BIGINT UNSIGNED NOT NULL,
+ customer_id BIGINT UNSIGNED NOT NULL,
+ order_id BIGINT UNSIGNED NULL,
+ subject VARCHAR(190) NULL,
+ body TEXT NOT NULL,
+ sender_role ENUM('customer','vendor') NOT NULL,
+ status ENUM('open','read','closed') NOT NULL DEFAULT 'open',
+ created_at TIMESTAMP NULL,
+ updated_at TIMESTAMP NULL,
+ INDEX idx_customer_messages_vendor_status (vendor_id,status),
+ INDEX idx_customer_messages_thread (vendor_id,customer_id,order_id),
+ CONSTRAINT fk_customer_messages_vendor FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE,
+ CONSTRAINT fk_customer_messages_customer FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
+ CONSTRAINT fk_customer_messages_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS return_requests (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ order_id BIGINT UNSIGNED NOT NULL,
+ order_item_id BIGINT UNSIGNED NULL,
+ vendor_id BIGINT UNSIGNED NOT NULL,
+ customer_id BIGINT UNSIGNED NOT NULL,
+ reason VARCHAR(190) NOT NULL,
+ details TEXT NULL,
+ refund_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+ currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+ status ENUM('requested','approved','rejected','received','refunded','cancelled') NOT NULL DEFAULT 'requested',
+ resolution_note TEXT NULL,
+ processed_at TIMESTAMP NULL,
+ created_at TIMESTAMP NULL,
+ updated_at TIMESTAMP NULL,
+ INDEX idx_return_requests_vendor_status (vendor_id,status),
+ INDEX idx_return_requests_customer (customer_id,status),
+ CONSTRAINT fk_return_requests_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+ CONSTRAINT fk_return_requests_item FOREIGN KEY (order_item_id) REFERENCES order_items(id) ON DELETE SET NULL,
+ CONSTRAINT fk_return_requests_vendor FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE,
+ CONSTRAINT fk_return_requests_customer FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS audit_logs (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,user_id BIGINT UNSIGNED NULL,action VARCHAR(120) NOT NULL,entity_type VARCHAR(120),entity_id BIGINT UNSIGNED,ip_address VARCHAR(45),user_agent TEXT,metadata JSON,created_at TIMESTAMP NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS pages (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,slug VARCHAR(180) UNIQUE NOT NULL,title VARCHAR(220) NOT NULL,content LONGTEXT,status TINYINT(1) DEFAULT 1,created_at TIMESTAMP NULL,updated_at TIMESTAMP NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT IGNORE INTO roles(name,description) VALUES ('super_admin','Full platform control'),('admin','Administrative staff'),('staff','Staff member'),('vendor','Marketplace seller'),('b2b_customer','Business buyer'),('customer','Retail customer'),('affiliate','Affiliate partner'),('courier','Delivery staff'),('streamer','Live commerce streamer');
