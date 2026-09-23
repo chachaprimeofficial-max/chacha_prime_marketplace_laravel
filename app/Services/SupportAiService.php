@@ -88,6 +88,17 @@ PROMPT;
         ]);
 
         if ($data['escalate']) {
+            $staffIds = DB::table('users')->whereIn('role', ['super_admin','admin','staff'])->where('status','active')->pluck('id');
+            foreach ($staffIds as $staffId) {
+                DB::table('notifications')->insert([
+                    'user_id' => $staffId,
+                    'type' => 'support.escalated',
+                    'title' => 'AI support case escalated',
+                    'message' => 'Customer #'.$user->id.' needs human support for case #'.$conversationId.'.',
+                    'data' => json_encode(['conversation_id'=>$conversationId,'department'=>$data['department']]),
+                    'created_at' => now(),
+                ]);
+            }
             DB::table('support_conversations')->where('id', $conversationId)->update([
                 'status' => 'open',
                 'department' => $data['department'],
