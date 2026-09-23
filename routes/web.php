@@ -85,7 +85,8 @@ Route::middleware(['auth','role:super_admin,admin,staff'])->prefix('admin')->nam
  Route::get('/staff',[AdminStaffController::class,'index'])->name('staff');
  Route::get('/audit-logs',[AdminAuditLogController::class,'index'])->name('audit-logs');
  Route::post('/staff/{id}',[AdminStaffController::class,'update'])->name('staff.update');
- Route::post('/staff/{id}/permissions',[AdminStaffController::class,'assignPermissions'])->name('staff.permissions');
+ Route::post('/staff/{id}/permissions',[AdminStaffController::class,'assignPermissions'])->middleware('role:super_admin')->name('staff.permissions');
+
  Route::post('/users/{user}',[AdminController::class,'updateUser'])->name('users.update');
  Route::get('/vendors',[AdminController::class,'vendors'])->name('vendors');
  Route::post('/vendors/{vendor}',[AdminController::class,'updateVendor'])->name('vendors.update');
