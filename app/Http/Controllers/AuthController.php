@@ -19,7 +19,7 @@ class AuthController extends Controller {
         $user=User::create(['name'=>$data['name'],'email'=>$data['email'],'phone'=>$data['phone']??null,'password'=>$data['password'],'role'=>$data['type'],'status'=>$data['type']==='vendor'?'pending':'active','totp_secret'=>encrypt($secret),'two_factor_enabled'=>true]);
         if($user->role==='vendor') Vendor::create(['user_id'=>$user->id,'business_name'=>$user->name,'status'=>'pending']);
         $this->sendOtp($user);
-        session(['pending_auth_user'=>$user->id]);
+        session(['pending_auth_user'=>$user->id,'show_totp_setup'=>true]);
         return redirect()->route('auth.otp')->with('success','Verification code sent to your email.');
     }
     public function login(Request $request){
@@ -38,12 +38,12 @@ class AuthController extends Controller {
         $otp->update(['consumed_at'=>now()]);
         session(['pending_totp_user'=>$user->id]); return redirect()->route('auth.totp');
     }
-    public function totp(){abort_unless(session('pending_totp_user'),403);return view('auth.totp');}
+    public function totp(){abort_unless(session('pending_totp_user'),403);$user=User::findOrFail(session('pending_totp_user'));$setup=null;if(session('show_totp_setup')){$secret=decrypt($user->totp_secret);$setup=['secret'=>$secret,'uri'=>app(TotpService::class)->uri($user->email,$secret)];}return view('auth.totp',compact('setup'));}
     public function verifyTotp(Request $request,TotpService $totp){
         $request->validate(['code'=>'required|digits:6']); $user=User::findOrFail(session('pending_totp_user'));
         if(!$user->totp_secret || !$totp->verify(decrypt($user->totp_secret),$request->code)) return back()->withErrors(['code'=>'Invalid authenticator code.']);
-        Auth::login($user,true); $request->session()->regenerate(); session()->forget(['pending_auth_user','pending_totp_user']);
-        return match($user->role){'super_admin','admin'=>redirect()->route('admin.dashboard'),'vendor'=>redirect()->route('vendor.dashboard'),default=>redirect()->route('customer.dashboard')};
+        Auth::login($user,true); $request->session()->regenerate(); session()->forget(['pending_auth_user','pending_totp_user','show_totp_setup']);
+        return match($user->role){'super_admin','admin','staff'=>redirect()->route('admin.dashboard'),'vendor'=>redirect()->route('vendor.dashboard'),default=>redirect()->route('customer.dashboard')};
     }
     public function logout(Request $request){Auth::logout();$request->session()->invalidate();$request->session()->regenerateToken();return redirect()->route('home');}
     private function sendOtp(User $user): void {
