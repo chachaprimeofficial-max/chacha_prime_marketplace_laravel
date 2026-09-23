@@ -90,5 +90,6 @@ Route::middleware('auth')->prefix('customer')->name('customer.')->group(function
  Route::get('/virtual-card',[StorefrontController::class,'card'])->name('card');
  Route::get('/notifications',[StorefrontController::class,'notifications'])->name('notifications');
  Route::get('/group-buying',[StorefrontController::class,'groupBuying'])->name('group-buying');
+ Route::post('/group-buying/{id}/join',[StorefrontController::class,'joinGroup'])->name('group-buying.join');
  Route::get('/live-shopping',[StorefrontController::class,'liveShopping'])->name('live-shopping');
 });
