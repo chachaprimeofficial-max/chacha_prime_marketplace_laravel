@@ -13,6 +13,8 @@ class PaymentService
         $method = \DB::table('payment_methods')->where('id',$methodId)->where('enabled',1)->first();
         abort_unless($method,422,'Selected payment method is unavailable.');
 
+        $order = Order::findOrFail($order->id);
+
         return Payment::create([
             'order_id'=>$order->id,
             'user_id'=>$order->user_id,
