@@ -28,6 +28,12 @@ Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->gr
  Route::get('/pricing',[VendorController::class,'pricing'])->name('pricing');
  Route::get('/inventory',[VendorController::class,'inventory'])->name('inventory');
  Route::get('/analytics',[VendorController::class,'analytics'])->name('analytics');
+ Route::get('/shipping',[VendorController::class,'shipping'])->name('shipping');
+ Route::get('/coupons',[VendorController::class,'coupons'])->name('coupons');
+ Route::get('/group-buying',[VendorController::class,'groupBuying'])->name('group-buying');
+ Route::get('/live-commerce',[VendorController::class,'liveCommerce'])->name('live-commerce');
+ Route::get('/ai',[VendorController::class,'ai'])->name('ai');
+ Route::get('/payouts',[VendorController::class,'payouts'])->name('payouts');
  Route::get('/orders',[VendorController::class,'orders'])->name('orders');
  Route::post('/orders/{id}',[VendorController::class,'updateOrder'])->name('orders.update');
  Route::get('/wallet',[VendorController::class,'wallet'])->name('wallet');
