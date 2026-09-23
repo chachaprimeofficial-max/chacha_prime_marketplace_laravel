@@ -1,4 +1,4 @@
-@extends('layouts.storefront')
+@extends('vendor.layout')
 @section('title','Coupons & Promotions — Seller Center')
 @push('styles')
 <style>
