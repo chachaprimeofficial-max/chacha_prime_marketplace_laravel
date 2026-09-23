@@ -1,10 +1,10 @@
-@extends('layouts.storefront')
+@extends('vendor.layout')
 @section('title','Seller Center — Chacha Prime')
 @push('styles')
 <style>
 /* Chacha Prime — premium seller center */
-.cp-seller-page{background:#f5f7fa;min-height:calc(100vh - 104px);padding:22px}
-.cp-seller-shell{max-width:1500px;margin:0 auto;display:grid;grid-template-columns:250px minmax(0,1fr);gap:20px}
+ .cp-seller-page{background:#f5f7fa;min-height:calc(100vh - 104px);padding:22px}
+ .cp-seller-page-inner{max-width:1500px;margin:0 auto}
 .cp-seller-sidebar{background:#111827;color:#fff;border-radius:18px;padding:16px;position:sticky;top:124px;height:max-content;box-shadow:0 12px 35px #11182718}
 .cp-seller-brand{padding:12px 12px 18px;border-bottom:1px solid #ffffff18;margin-bottom:10px}
 .cp-seller-brand small{display:block;color:#94a3b8;font-size:10px;font-weight:800;letter-spacing:1.6px}
@@ -15,7 +15,7 @@
 .cp-seller-nav a.is-active{box-shadow:inset 3px 0 #f59e0b}
 .cp-seller-sidebar .cp-seller-help{margin-top:16px;padding:13px;background:#ffffff0b;border:1px solid #ffffff12;border-radius:12px;color:#cbd5e1;font-size:12px;line-height:1.5}
 .cp-seller-sidebar .cp-seller-help a{color:#fbbf24;text-decoration:none;font-weight:800}
-.cp-seller-main{min-width:0}
+
 .cp-seller-top{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:20px 22px;display:flex;justify-content:space-between;gap:18px;align-items:center;box-shadow:0 8px 25px #11182708}
 .cp-seller-eyebrow{font-size:10px;font-weight:900;letter-spacing:1.8px;color:#f59e0b}
 .cp-seller-top h1{margin:6px 0 4px;font-size:30px;letter-spacing:-.8px;color:#111827}
@@ -62,35 +62,7 @@
 </style>
 @endpush
 @section('content')
-<div class="cp-seller-page">
-  <div class="cp-seller-shell">
-    <aside class="cp-seller-sidebar">
-      <div class="cp-seller-brand"><a href="{{route('home')}}" style="display:block"><img src="{{asset('images/chacha-logo.svg')}}" alt="CHACHA 查查 Prime" style="width:190px;height:48px;object-fit:contain;object-position:left center"></a><strong>Seller Center</strong></div>
-      <nav class="cp-seller-nav">
-        <a class="is-active" href="{{route('vendor.dashboard')}}">▦ <span>Overview</span></a>
-        <a href="{{route('vendor.products')}}">▣ <span>Products</span></a>
-        <a href="{{route('vendor.orders')}}">▤ <span>Orders</span></a>
-        <a href="{{route('vendor.inventory')}}">◫ <span>Inventory</span></a>
-        <a href="{{route('vendor.pricing')}}">◈ <span>B2B / B2C Pricing</span></a>
-        <a href="{{route('vendor.analytics')}}">◒ <span>Analytics</span></a>
-        <a href="{{route('vendor.account-health')}}">♥ <span>Account Health</span></a>
-        <a href="{{route('vendor.reports')}}">▤ <span>Reports</span></a>
-        <a href="{{route('vendor.group-buying')}}">◎ <span>Group Buying</span></a>
-        <a href="{{route('vendor.live-commerce')}}">▶ <span>Live Commerce</span></a>
-        <a href="{{route('vendor.coupons')}}">◇ <span>Coupons</span></a>
-        <a href="{{route('vendor.shipping')}}">⌁ <span>Shipping</span></a>
-        <a href="{{route('vendor.wallet')}}">▱ <span>Wallet</span></a>
-        <a href="{{route('vendor.payouts')}}">↗ <span>Payouts</span></a>
-        <a href="{{route('vendor.returns')}}">↩ <span>Returns & Refunds</span></a>
-        <a href="{{route('vendor.messages')}}">✉ <span>Customer Messages</span></a>
-        <a href="{{route('vendor.reviews')}}">★ <span>Reviews</span></a>
-        <a href="{{route('vendor.ai')}}">✦ <span>AI Assistant</span></a>
-      </nav>
-      <div class="cp-seller-help">Need help? Open the marketplace <a href="{{route('home')}}">Storefront</a> or contact Chacha Prime support.</div>
-    </aside>
-
-    <main class="cp-seller-main">
-      <section class="cp-seller-top">
+<div class="cp-seller-page"><div class="cp-seller-page-inner"><section class="cp-seller-top">
         <div>
           <div class="cp-seller-eyebrow">SELLER CENTER</div>
           <h1>{{ $vendor->business_name }}</h1>
@@ -171,7 +143,5 @@
           </table>
         </div>
       </section>
-    </main>
-  </div>
 </div>
 @endsection
