@@ -31,6 +31,8 @@ Route::middleware(['auth','role:super_admin,admin'])->prefix('admin')->name('adm
  Route::post('/categories',[AdminController::class,'storeCategory'])->name('categories.store');
  Route::get('/module/{module}',[AdminController::class,'module'])->name('module');
  Route::post('/module/{module}',[AdminController::class,'storeModule'])->name('module.store');
+ Route::post('/module/{module}/{id}',[AdminController::class,'updateModule'])->name('module.update');
+ Route::delete('/module/{module}/{id}',[AdminController::class,'deleteModule'])->name('module.delete');
  Route::post('/module/{module}/{id}/toggle',[AdminController::class,'toggle'])->name('module.toggle');
  Route::get('/orders',[AdminCommerceController::class,'orders'])->name('orders');
  Route::post('/orders/{order}',[AdminCommerceController::class,'updateOrder'])->name('orders.update');
