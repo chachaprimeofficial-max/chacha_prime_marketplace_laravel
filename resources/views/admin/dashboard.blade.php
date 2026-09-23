@@ -1,5 +1,7 @@
-@extends('layouts.storefront')
+@extends('admin.layout')
 @section('title','Admin Dashboard — Chacha Prime')
+@section('page_heading','Marketplace Overview')
 @section('content')
-<section class="dashboard-shell"><div class="dashboard-hero"><span class="eyebrow">CONTROL CENTER</span><h1>Admin dashboard</h1><p>Platform operations, vendors, products, orders, payments, shipping, AI, live commerce and settings.</p></div><div class="dashboard-grid"><article class="dashboard-card"><span>Customers</span><strong>0</strong><small>Accounts</small></article><article class="dashboard-card"><span>Vendors</span><strong>0</strong><small>Pending approvals</small></article><article class="dashboard-card"><span>Orders</span><strong>0</strong><small>Marketplace orders</small></article><article class="dashboard-card"><span>Revenue</span><strong>$0</strong><small>Gross marketplace sales</small></article></div></section>
+<div class="grid"><div class="stat"><small>Total Customers</small><strong>0</strong></div><div class="stat"><small>Vendors</small><strong>0</strong></div><div class="stat"><small>Orders</small><strong>0</strong></div><div class="stat"><small>Gross Sales</small><strong>$0</strong></div></div>
+<div class="panel" style="margin-top:18px"><h2>Platform control center</h2><p>Users, vendors, catalog, orders, payments, wallets, virtual cards, group buying, live commerce, shipping, AI and marketplace settings are managed from this area.</p></div>
 @endsection
