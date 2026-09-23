@@ -65,7 +65,7 @@
 <div class="cp-seller-page">
   <div class="cp-seller-shell">
     <aside class="cp-seller-sidebar">
-      <div class="cp-seller-brand"><small>CHACHA PRIME</small><strong>Seller Center</strong></div>
+      <div class="cp-seller-brand"><a href="{{route('home')}}" style="display:block"><img src="{{asset('images/chacha-logo.svg')}}" alt="CHACHA 查查 Prime" style="width:190px;height:48px;object-fit:contain;object-position:left center"></a><strong>Seller Center</strong></div>
       <nav class="cp-seller-nav">
         <a class="is-active" href="{{route('vendor.dashboard')}}">▦ <span>Overview</span></a>
         <a href="{{route('vendor.products')}}">▣ <span>Products</span></a>
