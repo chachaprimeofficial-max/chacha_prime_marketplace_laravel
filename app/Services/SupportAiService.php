@@ -162,6 +162,8 @@ PROMPT;
                 'id','order_id','order_item_id','vendor_id','reason','details','refund_amount','currency','status','resolution_note','created_at'
             ]);
 
+        $sellerThreads = DB::table('support_conversations')->where('customer_id',$user->id)->where('type','customer_vendor')->latest('last_message_at')->limit(8)->get(['id','vendor_id','order_id','subject','status','department','last_message_at']);
+
         $messages = $this->support->messages($conversationId, 24)->map(fn($m) => [
             'sender' => $m->sender_role,
             'body' => $m->body,
@@ -205,6 +207,7 @@ PROMPT;
             'notifications' => $notifications,
             'matched_products' => $products,
             'cart' => $cartItems,
+            'seller_threads' => $sellerThreads,
             'recent_support_messages' => $messages,
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
