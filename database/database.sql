@@ -1,6 +1,65 @@
 -- Chacha Prime Marketplace single manual MySQL schema.
 -- No Laravel migration files.
 SET FOREIGN_KEY_CHECKS=0;
+CREATE TABLE IF NOT EXISTS product_identifiers (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ product_id BIGINT UNSIGNED NOT NULL,
+ product_code VARCHAR(40) UNIQUE NOT NULL,
+ internal_sku VARCHAR(100) UNIQUE NOT NULL,
+ barcode_value VARCHAR(100) UNIQUE NOT NULL,
+ barcode_type VARCHAR(20) NOT NULL DEFAULT 'CODE128',
+ qr_token VARCHAR(100) UNIQUE NOT NULL,
+ official_gtin VARCHAR(40) NULL,
+ created_at TIMESTAMP NULL,
+ updated_at TIMESTAMP NULL,
+ FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE,
+ INDEX(product_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS catalog_imports (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ user_id BIGINT UNSIGNED NOT NULL,
+ source_type ENUM('csv','feed','api','scraper') NOT NULL DEFAULT 'csv',
+ source_name VARCHAR(190) NULL,
+ file_path VARCHAR(500) NULL,
+ status ENUM('queued','processing','completed','failed') NOT NULL DEFAULT 'queued',
+ total_rows INT UNSIGNED NOT NULL DEFAULT 0,
+ imported_rows INT UNSIGNED NOT NULL DEFAULT 0,
+ failed_rows INT UNSIGNED NOT NULL DEFAULT 0,
+ error_log LONGTEXT NULL,
+ created_at TIMESTAMP NULL,
+ updated_at TIMESTAMP NULL,
+ FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+ INDEX(status,created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS subscription_plans (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ name VARCHAR(120) NOT NULL,
+ audience ENUM('vendor','b2b_customer','customer') NOT NULL DEFAULT 'vendor',
+ price DECIMAL(18,2) NOT NULL DEFAULT 0,
+ currency CHAR(3) NOT NULL DEFAULT 'USD',
+ billing_cycle ENUM('monthly','yearly') NOT NULL DEFAULT 'monthly',
+ product_limit INT UNSIGNED NULL,
+ ai_limit INT UNSIGNED NULL,
+ import_limit INT UNSIGNED NULL,
+ features JSON NULL,
+ status TINYINT(1) NOT NULL DEFAULT 1,
+ created_at TIMESTAMP NULL,
+ updated_at TIMESTAMP NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS user_subscriptions (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ user_id BIGINT UNSIGNED NOT NULL,
+ plan_id BIGINT UNSIGNED NOT NULL,
+ status ENUM('active','cancelled','expired','pending') NOT NULL DEFAULT 'active',
+ starts_at TIMESTAMP NULL,
+ ends_at TIMESTAMP NULL,
+ created_at TIMESTAMP NULL,
+ updated_at TIMESTAMP NULL,
+ FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+ FOREIGN KEY(plan_id) REFERENCES subscription_plans(id) ON DELETE CASCADE,
+ INDEX(user_id,status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS cache (`key` VARCHAR(255) PRIMARY KEY, `value` MEDIUMTEXT NOT NULL, expiration INT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS cache_locks (`key` VARCHAR(255) PRIMARY KEY, owner VARCHAR(255) NOT NULL, expiration INT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS jobs (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, queue VARCHAR(255) NOT NULL, payload LONGTEXT NOT NULL, attempts TINYINT UNSIGNED NOT NULL, reserved_at INT UNSIGNED NULL, available_at INT UNSIGNED NOT NULL, created_at INT UNSIGNED NOT NULL, INDEX(`queue`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
