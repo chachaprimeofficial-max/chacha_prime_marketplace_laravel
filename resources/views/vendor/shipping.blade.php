@@ -1,0 +1,1 @@
+@extends('layouts.storefront') @section('title','Shipping') @section('content')<div class="container"><h1>Shipping Methods</h1><div class="panel"><table><tr><th>Method</th><th>Provider</th><th>Mode</th></tr>@foreach($methods as $m)<tr><td>{{$m->name}}</td><td>{{$m->provider}}</td><td>{{$m->mode}}</td></tr>@endforeach</table></div></div>@endsection
