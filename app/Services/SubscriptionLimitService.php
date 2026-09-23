@@ -24,11 +24,13 @@ class SubscriptionLimitService
     }
     public function assertWithin(int $userId,string $metric,int $increment=1): void
     {
+        $map=['products_created'=>'product_limit','ai_used'=>'ai_limit','imports_used'=>'import_limit'];
+        $usageField=$map[$metric]??null; if(!$usageField) throw new RuntimeException('Unknown subscription metric.');
         $plan=$this->planFor($userId);
         if(!$plan) throw new RuntimeException('No active subscription plan is assigned to this account.');
-        $limit=$plan->{$metric.'_limit'} ?? null;
+        $limit=$plan->{$usageField} ?? null;
         if($limit===null) return;
-        $used=(int)($this->usage($userId)->{$metric.'_used'} ?? 0);
+        $used=(int)($this->usage($userId)->{$metric} ?? 0);
         if($used+$increment>(int)$limit) throw new RuntimeException(ucwords(str_replace('_',' ',$metric)).' limit reached for your '.$plan->name.' plan.');
     }
     public function consume(int $userId,string $metric,int $increment=1): void
