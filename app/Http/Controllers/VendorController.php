@@ -82,7 +82,35 @@ class VendorController extends Controller
 
  public function inventory(Request $request){$vendor=$this->vendor($request);return view('vendor.inventory',['vendor'=>$vendor,'products'=>Product::where('vendor_id',$vendor->id)->orderBy('stock')->paginate(25)]);}
 
- public function analytics(Request $request){$vendor=$this->vendor($request);$items=DB::table('order_items')->where('vendor_id',$vendor->id);$sales=(clone $items)->join('orders','orders.id','=','order_items.order_id')->where('orders.payment_status','paid')->sum('order_items.subtotal');return view('vendor.analytics',['vendor'=>$vendor,'stats'=>['orders'=>(clone $items)->distinct('order_id')->count('order_id'),'sales'=>$sales,'pending'=>(clone $items)->join('orders','orders.id','=','order_items.order_id')->where('orders.status','pending')->distinct('order_id')->count('order_id'),'delivered'=>(clone $items)->join('orders','orders.id','=','order_items.order_id')->where('orders.fulfillment_status','delivered')->distinct('order_id')->count('order_id')]]);}
+ public function analytics(Request $request){
+  $vendor=$this->vendor($request);
+  $days=(int)$request->get('days',30); if(!in_array($days,[7,30,90],true))$days=30;
+  $from=now()->subDays($days-1)->startOfDay(); $to=now()->endOfDay();
+  $base=DB::table('order_items')->join('orders','orders.id','=','order_items.order_id')->where('order_items.vendor_id',$vendor->id)->whereBetween('orders.created_at',[$from,$to]);
+  $sales=(clone $base)->where('orders.payment_status','paid')->sum('order_items.subtotal');
+  $orders=(clone $base)->distinct('orders.id')->count('orders.id');
+  $pending=(clone $base)->where('orders.status','pending')->distinct('orders.id')->count('orders.id');
+  $delivered=(clone $base)->where('orders.fulfillment_status','delivered')->distinct('orders.id')->count('orders.id');
+  $daily=(clone $base)->where('orders.payment_status','paid')->selectRaw('DATE(orders.created_at) day,SUM(order_items.subtotal) sales')->groupByRaw('DATE(orders.created_at)')->orderBy('day')->get();
+  $topProducts=(clone $base)->where('orders.payment_status','paid')->select('order_items.product_id','order_items.product_name')->selectRaw('SUM(order_items.quantity) quantity,SUM(order_items.subtotal) sales')->groupBy('order_items.product_id','order_items.product_name')->orderByDesc('sales')->limit(8)->get();
+  return view('vendor.analytics',compact('vendor','days','from','to','daily','topProducts')+['stats'=>['orders'=>$orders,'sales'=>$sales,'pending'=>$pending,'delivered'=>$delivered]]);
+ }
+
+ public function accountHealth(Request $request){
+  $vendor=$this->vendor($request);$productQ=Product::where('vendor_id',$vendor->id);
+  $totalProducts=(clone $productQ)->count();$published=(clone $productQ)->where('status','published')->count();$pending=(clone $productQ)->where('status','pending')->count();$lowStock=(clone $productQ)->where('stock','<=',10)->count();
+  $items=DB::table('order_items')->join('orders','orders.id','=','order_items.order_id')->where('order_items.vendor_id',$vendor->id);
+  $totalOrders=(clone $items)->distinct('orders.id')->count('orders.id');$cancelled=(clone $items)->where('orders.status','cancelled')->distinct('orders.id')->count('orders.id');$delivered=(clone $items)->where('orders.fulfillment_status','delivered')->distinct('orders.id')->count('orders.id');
+  $productIds=(clone $productQ)->pluck('id');$reviews=DB::table('reviews')->whereIn('product_id',$productIds);$reviewCount=(clone $reviews)->count();$avgRating=round((float)((clone $reviews)->avg('rating')??0),2);
+  return view('vendor.account-health',compact('vendor','totalProducts','published','pending','lowStock','totalOrders','cancelled','delivered','reviewCount','avgRating'));
+ }
+
+ public function reports(Request $request){
+  $vendor=$this->vendor($request);$days=(int)$request->get('days',30);if(!in_array($days,[7,30,90],true))$days=30;$from=now()->subDays($days-1)->startOfDay();
+  $base=DB::table('order_items')->join('orders','orders.id','=','order_items.order_id')->where('order_items.vendor_id',$vendor->id)->where('orders.created_at','>=',$from);
+  $rows=(clone $base)->selectRaw('DATE(orders.created_at) day,COUNT(DISTINCT orders.id) orders,SUM(order_items.quantity) units,SUM(CASE WHEN orders.payment_status="paid" THEN order_items.subtotal ELSE 0 END) sales')->groupByRaw('DATE(orders.created_at)')->orderByDesc('day')->get();
+  return view('vendor.reports',compact('vendor','days','rows'));
+ }
 
  public function shipping(Request $request){$vendor=$this->vendor($request);$methods=DB::table('shipping_methods')->where('enabled',1)->orderBy('name')->get();return view('vendor.shipping',compact('vendor','methods'));}
 
