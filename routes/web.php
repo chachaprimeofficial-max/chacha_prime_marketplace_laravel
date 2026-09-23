@@ -11,6 +11,13 @@ Route::get('/product/{id}',[StorefrontController::class,'product'])->name('produ
 Route::get('/cart',[StorefrontController::class,'cart'])->name('cart');
 Route::post('/cart/{id}',[StorefrontController::class,'addToCart'])->name('cart.add');
 Route::post('/cart/{id}/remove',[StorefrontController::class,'removeFromCart'])->name('cart.remove');
+Route::middleware('auth')->group(function(){
+ Route::get('/checkout',[StorefrontController::class,'checkout'])->name('checkout');
+ Route::post('/checkout',[StorefrontController::class,'placeOrder'])->name('checkout.place');
+ Route::get('/customer/orders',[StorefrontController::class,'customerOrders'])->name('customer.orders');
+ Route::get('/customer/wishlist',[StorefrontController::class,'wishlist'])->name('customer.wishlist');
+ Route::post('/customer/wishlist/{id}',[StorefrontController::class,'addWishlist'])->name('customer.wishlist.add');
+});
 Route::get('/health',fn()=>response()->json(['status'=>'ok','application'=>config('app.name'),'version'=>app()->version()]))->name('health');
 Route::prefix('auth')->name('auth.')->group(function(){
  Route::get('/login',[AuthController::class,'showLogin'])->name('login');
