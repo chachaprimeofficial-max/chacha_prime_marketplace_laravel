@@ -68,6 +68,11 @@ Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->gr
  Route::delete('/live-commerce/{id}/pin/{productId}',[VendorController::class,'unpinLiveProduct'])->name('live-commerce.unpin');
  Route::get('/ai',[VendorController::class,'ai'])->name('ai');
  Route::get('/payouts',[VendorController::class,'payouts'])->name('payouts');
+ Route::post('/payouts',[VendorController::class,'requestPayout'])->name('payouts.request');
+ Route::get('/returns',[VendorController::class,'returns'])->name('returns');
+ Route::post('/returns/{id}',[VendorController::class,'updateReturn'])->name('returns.update');
+ Route::get('/messages',[VendorController::class,'messages'])->name('messages');
+ Route::post('/messages',[VendorController::class,'sendMessage'])->name('messages.send');
  Route::get('/orders',[VendorController::class,'orders'])->name('orders');
  Route::post('/orders/{id}',[VendorController::class,'updateOrder'])->name('orders.update');
  Route::get('/wallet',[VendorController::class,'wallet'])->name('wallet');
