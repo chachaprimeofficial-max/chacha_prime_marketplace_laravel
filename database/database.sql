@@ -218,4 +218,50 @@ SELECT r.id,p.id FROM roles r CROSS JOIN permissions p WHERE r.name='staff' AND 
 INSERT IGNORE INTO currencies(code,name,symbol,rate_to_base,source) VALUES ('USD','US Dollar','$',1,'manual'),('PKR','Pakistani Rupee','Rs',1,'manual'),('CNY','Chinese Yuan','¥',1,'manual'),('AED','UAE Dirham','د.إ',1,'manual'),('EUR','Euro','€',1,'manual');
 INSERT IGNORE INTO payment_methods(code,name,type,enabled) VALUES ('pingpong','PingPong','gateway',0),('lianlianpay','LianLianPay','gateway',0),('worldfirst','WorldFirst','gateway',0),('alipay','Alipay','gateway',0),('wechat_pay','WeChat Pay','gateway',0),('visa','Visa','gateway',0),('mastercard','Mastercard','gateway',0),('amex','American Express','gateway',0),('paypal','PayPal','gateway',0),('easypaisa','Easypaisa','gateway',0),('jazzcash','JazzCash','gateway',0),('raast','Raast','gateway',0),('bank_transfer','Bank Transfer','bank',0),('cod','Cash on Delivery','cod',0);
 INSERT IGNORE INTO shipping_methods(code,name,provider,mode,enabled) VALUES ('fedex','FedEx','FedEx','api',0),('ups','UPS','UPS','api',0),('usps','USPS','USPS','api',0),('dhl','DHL','DHL','api',0),('tcs','TCS','TCS','api',0),('leopards','Leopards','Leopards','api',0),('postex','PostEx','PostEx','api',0),('sf_express','SF Express','SF Express','api',0),('jt','J&T','J&T','api',0),('manual','Manual Shipping','Internal','manual',1);
+
+CREATE TABLE IF NOT EXISTS support_conversations (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ type ENUM('customer_support','vendor_support','customer_vendor') NOT NULL DEFAULT 'customer_support',
+ customer_id BIGINT UNSIGNED NULL,
+ vendor_id BIGINT UNSIGNED NULL,
+ order_id BIGINT UNSIGNED NULL,
+ subject VARCHAR(190) NOT NULL,
+ department VARCHAR(60) NOT NULL DEFAULT 'customer_support',
+ status ENUM('ai_handled','open','pending','closed') NOT NULL DEFAULT 'open',
+ priority ENUM('low','normal','high','urgent') NOT NULL DEFAULT 'normal',
+ assigned_to BIGINT UNSIGNED NULL,
+ ai_handled TINYINT(1) NOT NULL DEFAULT 0,
+ escalation_reason VARCHAR(500) NULL,
+ last_message_at TIMESTAMP NULL,
+ created_at TIMESTAMP NULL,
+ updated_at TIMESTAMP NULL,
+ INDEX idx_support_customer_status (customer_id,status,last_message_at),
+ INDEX idx_support_vendor_status (vendor_id,status,last_message_at),
+ INDEX idx_support_admin_queue (status,department,assigned_to,last_message_at),
+ INDEX idx_support_type (type,status),
+ CONSTRAINT fk_support_customer FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
+ CONSTRAINT fk_support_vendor FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE,
+ CONSTRAINT fk_support_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL,
+ CONSTRAINT fk_support_assigned FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS support_messages (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ conversation_id BIGINT UNSIGNED NOT NULL,
+ sender_user_id BIGINT UNSIGNED NULL,
+ sender_role ENUM('customer','vendor','admin','ai','system') NOT NULL,
+ body LONGTEXT NOT NULL,
+ metadata JSON NULL,
+ read_at TIMESTAMP NULL,
+ created_at TIMESTAMP NULL,
+ INDEX idx_support_messages_conversation (conversation_id,id),
+ INDEX idx_support_messages_sender (sender_user_id,created_at),
+ CONSTRAINT fk_support_messages_conversation FOREIGN KEY (conversation_id) REFERENCES support_conversations(id) ON DELETE CASCADE,
+ CONSTRAINT fk_support_messages_sender FOREIGN KEY (sender_user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO settings(setting_key,setting_value,value_type,is_public,updated_at) VALUES
+('support_whatsapp','','string',1,NULL),
+('support_wechat','','string',1,NULL),
+('support_email','support@chachaprime.com','string',1,NULL);
 SET FOREIGN_KEY_CHECKS=1;
