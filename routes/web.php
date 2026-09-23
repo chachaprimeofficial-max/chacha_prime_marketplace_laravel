@@ -86,6 +86,11 @@ Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->gr
 Route::middleware(['auth','role:super_admin,admin,staff'])->prefix('admin')->name('admin.')->group(function(){
  Route::get('/',fn()=>redirect()->route('admin.dashboard'));
  Route::get('/dashboard',[AdminController::class,'dashboard'])->name('dashboard');
+ Route::get('/catalog-tools',[AdminController::class,'catalogTools'])->name('catalog-tools');
+ Route::post('/subscription-plans',[AdminController::class,'storeSubscriptionPlan'])->name('subscription-plans.store');
+ Route::get('/scan-center',[AdminController::class,'scanCenter'])->name('scan-center');
+ Route::get('/scan-center/lookup',[AdminController::class,'scanLookup'])->name('scan-center.lookup');
+ Route::post('/products/{id}/identifier',[AdminController::class,'ensureProductIdentifier'])->name('products.identifier');
  Route::get('/users',[AdminController::class,'users'])->name('users');
  Route::get('/staff',[AdminStaffController::class,'index'])->name('staff');
  Route::get('/audit-logs',[AdminAuditLogController::class,'index'])->name('audit-logs');
