@@ -61,6 +61,22 @@ class AdminSupportController extends Controller
         $data=$request->validate(['body'=>'required|string|max:8000']);
         $conversation=DB::table('support_conversations')->where('id',$id)->firstOrFail();
         $support->addMessage($id,$request->user()->id,'admin',$data['body']);
+        $recipient = null;
+        if ($conversation->customer_id) {
+            $recipient = (int) $conversation->customer_id;
+        } elseif ($conversation->vendor_id) {
+            $recipient = (int) DB::table('vendors')->where('id',$conversation->vendor_id)->value('user_id');
+        }
+        if ($recipient) {
+            DB::table('notifications')->insert([
+                'user_id'=>$recipient,
+                'type'=>'support.reply',
+                'title'=>'New support reply',
+                'message'=>'Chacha Prime support replied to case #'.$id.'.',
+                'data'=>json_encode(['conversation_id'=>$id]),
+                'created_at'=>now(),
+            ]);
+        }
         DB::table('support_conversations')->where('id',$id)->update(['status'=>'pending','updated_at'=>now()]);
         return back();
     }
