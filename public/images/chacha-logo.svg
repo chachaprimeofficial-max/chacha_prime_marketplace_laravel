@@ -1,12 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220" role="img" aria-label="CHACHA 查查 Prime">
-
+<rect width="900" height="220" fill="#050505"/>
 <g fill="#fff">
-<path d="M105 42c-37 0-67 30-67 67s30 67 67 67c25 0 48-14 59-36h-31c-7 9-17 15-28 15-26 0-46-21-46-46s20-46 46-46c15 0 28 7 36 19l21-21c-15-12-35-19-57-19z"/>
-<path d="M63 87h77l-10 35H76z"/>
-<circle cx="88" cy="140" r="8"/><circle cx="126" cy="140" r="8"/>
-<path d="M151 50h2v108h-2z"/>
-<text x="174" y="112" font-family="Arial,Helvetica,sans-serif" font-size="72" font-weight="800" letter-spacing="3">CHACHA</text>
-<text x="590" y="112" font-family="Arial,'Noto Sans CJK SC',sans-serif" font-size="58" font-weight="700">查查</text>
-<text x="360" y="176" font-family="Arial,Helvetica,sans-serif" font-size="55" font-style="italic" font-weight="800">Prime</text>
-<path d="M306 186c66 16 144 16 210-2-10 11-18 18-31 25 8-7 12-12 15-18-60 13-132 13-194-5z"/>
+<path d="M105 40c-39 0-70 31-70 70s31 70 70 70c26 0 50-14 62-38h-34c-7 10-17 16-28 16-27 0-48-21-48-48s21-48 48-48c16 0 30 8 39 21l23-23c-16-13-38-20-62-20z"/>
+<path d="M62 84h83l-11 38H75z"/><circle cx="88" cy="145" r="9"/><circle cx="129" cy="145" r="9"/>
+<rect x="154" y="34" width="5" height="152" rx="2.5"/>
+<text x="181" y="112" font-family="Arial,Helvetica,sans-serif" font-size="72" font-weight="800" letter-spacing="3">CHACHA</text>
+<text x="602" y="112" font-family="Arial,sans-serif" font-size="58" font-weight="700">查查</text>
+<text x="355" y="176" font-family="Arial,Helvetica,sans-serif" font-size="55" font-style="italic" font-weight="800">Prime</text>
+<path d="M301 188c70 17 151 16 222-4-10 12-20 20-35 27 9-8 14-14 17-20-63 14-139 14-204-3z"/>
 </g></svg>
