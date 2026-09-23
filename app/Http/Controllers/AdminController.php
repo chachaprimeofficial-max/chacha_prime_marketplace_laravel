@@ -74,7 +74,7 @@ class AdminController extends Controller
         ];
         abort_unless(isset($schemas[$module]),404); $schema=$schemas[$module];
         $data=$request->validate($schema['fields']); $data['created_at']=now(); $data['updated_at']=now();
-        if(in_array($module,['brands','coupons','currencies','payment-methods','shipping','pages'],true)) $data['enabled']= $module==='pages'?null:1;
+        if(in_array($module,['brands','coupons','currencies','payment-methods','shipping'],true)) $data['enabled']=1;
         if($module==='pages') $data['status']=1;
         $id=DB::table($schema['table'])->insertGetId($data); app(AuditLogService::class)->log('module.created',$schema['table'],$id,['module'=>$module,'data'=>$data]); return back()->with('success',$schema['table'].' record created.');
     }
