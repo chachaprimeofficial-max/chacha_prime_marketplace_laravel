@@ -19,7 +19,7 @@
 </form>
 <div class="table-wrap"><table><thead><tr><th>Case</th><th>Customer / Seller</th><th>Team</th><th>Status</th><th>Priority</th><th>Assigned</th></tr></thead><tbody>
 @forelse($conversations as $c)
-<tr><td><a href="{{route('admin.support.thread',$c->id)}}" style="font-weight:800;color:#b45309;text-decoration:none">#{{$c->id}} · {{Str::limit($c->subject,34)}}</a><div style="color:#94a3b8;font-size:9px">{{optional($c->last_message_at)->format('Y-m-d H:i') ?? $c->last_message_at}}</div></td>
+<tr><td><a href="{{route('admin.support.thread',$c->id)}}" style="font-weight:800;color:#b45309;text-decoration:none">#{{$c->id}} · {{Str::limit($c->subject,34)}}</a><div style="color:#94a3b8;font-size:9px">{{$c->last_message_at}}</div></td>
 <td>{{ $c->customer_name ?: ($c->vendor_name ?: $c->vendor_user_name ?: '—') }}<div style="font-size:9px;color:#94a3b8">{{$c->type}}</div></td>
 <td>{{$c->department}}</td><td><span class="status">{{$c->status}}</span></td><td>{{$c->priority}}</td><td>{{$c->assigned_name ?: 'Unassigned'}}</td></tr>
 @empty<tr><td colspan="6">No support conversations yet.</td></tr>@endforelse
