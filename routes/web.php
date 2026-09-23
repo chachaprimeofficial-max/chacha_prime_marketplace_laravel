@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminCommerceController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\AiController;
+use App\Http\Controllers\PaymentWebhookController;
 use Illuminate\Support\Facades\Route;
 Route::get('/',[StorefrontController::class,'home'])->name('home');
 Route::get('/shop',[StorefrontController::class,'shop'])->name('shop');
@@ -21,6 +22,7 @@ Route::middleware('auth')->group(function(){
  Route::get('/customer/wishlist',[StorefrontController::class,'wishlist'])->name('customer.wishlist');
  Route::post('/customer/wishlist/{id}',[StorefrontController::class,'addWishlist'])->name('customer.wishlist.add');
 });
+Route::post('/webhooks/payments/{provider}',[PaymentWebhookController::class,'handle'])->name('payments.webhook');
 Route::get('/health',fn()=>response()->json(['status'=>'ok','application'=>config('app.name'),'version'=>app()->version()]))->name('health');
 Route::prefix('auth')->name('auth.')->group(function(){
  Route::get('/login',[AuthController::class,'showLogin'])->name('login');
