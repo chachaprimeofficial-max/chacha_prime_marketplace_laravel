@@ -4,8 +4,8 @@
 .cp-vendor-sidebar{position:sticky;top:104px;height:calc(100vh - 104px);overflow:auto;background:#0b1220;color:#fff;padding:16px 12px;border-right:1px solid #1f2937;z-index:20}
 .cp-vendor-brand{padding:4px 8px 16px;border-bottom:1px solid #ffffff16;margin-bottom:10px}
 .cp-vendor-logo-link{display:block;width:100%;height:58px;overflow:hidden}.cp-vendor-logo-link img{width:190px;height:58px;display:block;object-fit:contain;object-position:left center}
-.cp-vendor-brand-title{font-size:18px;font-weight:900;margin-top:8px}.cp-vendor-brand-sub{font-size:10px;color:#94a3b8;margin-top:3px}
-.cp-vendor-nav{display:grid;gap:3px}.cp-vendor-nav a{display:flex;align-items:center;gap:10px;color:#cbd5e1;text-decoration:none;padding:9px 10px;border-radius:9px;font-size:12px;font-weight:800;transition:.15s}
+.cp-vendor-brand-title{font-size:18px;font-weight:900;margin-top:8px}.cp-vendor-brand-sub{font-size:11px;color:#94a3b8;margin-top:3px}
+.cp-vendor-nav{display:grid;gap:3px}.cp-vendor-nav a{display:flex;align-items:center;gap:10px;color:#cbd5e1;text-decoration:none;padding:9px 10px;border-radius:9px;font-size:14px;font-weight:800;transition:.15s}
 .cp-vendor-nav a:hover{background:#ffffff0d;color:#fff}.cp-vendor-nav a.is-active{background:#172554;color:#fff;box-shadow:inset 3px 0 #f59e0b}
 .cp-vendor-help{margin:14px 4px 0;padding:11px;border:1px solid #ffffff12;background:#ffffff08;border-radius:10px;color:#94a3b8;font-size:10px;line-height:1.5}.cp-vendor-help a{color:#fbbf24;font-weight:800;text-decoration:none}
 .cp-vendor-main{min-width:0;min-height:calc(100vh - 104px)}
