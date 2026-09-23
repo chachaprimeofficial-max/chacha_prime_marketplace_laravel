@@ -88,6 +88,8 @@ Route::middleware(['auth','role:super_admin,admin,staff'])->prefix('admin')->nam
  Route::get('/dashboard',[AdminController::class,'dashboard'])->name('dashboard');
  Route::get('/catalog-tools',[AdminController::class,'catalogTools'])->name('catalog-tools');
  Route::post('/subscription-plans',[AdminController::class,'storeSubscriptionPlan'])->name('subscription-plans.store');
+ Route::post('/catalog-import',[AdminController::class,'importCatalog'])->name('catalog-import');
+ Route::post('/ai-product-builder',[AdminController::class,'aiProductBuilder'])->middleware('throttle:10,1')->name('ai-product-builder');
  Route::get('/scan-center',[AdminController::class,'scanCenter'])->name('scan-center');
  Route::get('/scan-center/lookup',[AdminController::class,'scanLookup'])->name('scan-center.lookup');
  Route::post('/products/{id}/identifier',[AdminController::class,'ensureProductIdentifier'])->name('products.identifier');
