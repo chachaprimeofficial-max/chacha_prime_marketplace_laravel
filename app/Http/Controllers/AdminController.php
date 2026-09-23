@@ -97,9 +97,14 @@ class AdminController extends Controller
     }
     public function toggle(Request $request,string $module,int $id){
         $tables=['brands'=>'brands','reviews'=>'reviews','coupons'=>'coupons','shipping'=>'shipping_methods','currencies'=>'currencies','payment-methods'=>'payment_methods','pages'=>'pages','group-buying'=>'group_buying_campaigns','live-commerce'=>'live_streams'];
-        abort_unless(isset($tables[$module]),404); $table=$tables[$module]; $row=DB::table($table)->where('id',$id)->first(); abort_unless($row,404);
-        $current=property_exists($row,'enabled')?(int)$row->enabled:(property_exists($row,'status')?$row->status:1);
-        $next=($current===1||$current==='active'||$current==='published')?0:1;
-        $field=property_exists($row,'enabled')?'enabled':'status'; DB::table($table)->where('id',$id)->update([$field=>$next,'updated_at'=>now()]); app(AuditLogService::class)->log('module.toggled',$table,$id,['module'=>$module,'field'=>$field,'from'=>$current,'to'=>$next]); return back()->with('success','Status updated.');
+        abort_unless(isset($tables[$module]),404);$table=$tables[$module];$row=DB::table($table)->where('id',$id)->first();abort_unless($row,404);
+        if($module==='group-buying'){$next=$row->status==='active'?'draft':'active';$field='status';}
+        elseif($module==='live-commerce'){$next=$row->status==='live'?'scheduled':'live';$field='status';}
+        elseif($module==='reviews'){$next=$row->status==='approved'?'pending':'approved';$field='status';}
+        elseif($module==='pages'){$next=((int)$row->status)===1?0:1;$field='status';}
+        else{$field=property_exists($row,'enabled')?'enabled':'status';$current=(int)$row->{$field};$next=$current===1?0:1;}
+        DB::table($table)->where('id',$id)->update([$field=>$next,'updated_at'=>now()]);
+        app(AuditLogService::class)->log('module.toggled',$table,$id,['module'=>$module,'field'=>$field,'to'=>$next]);
+        return back()->with('success','Status updated.');
     }
 }
