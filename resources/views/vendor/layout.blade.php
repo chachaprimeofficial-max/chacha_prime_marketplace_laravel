@@ -10,31 +10,31 @@
 .cp-vendor-help{margin:14px 4px 0;padding:11px;border:1px solid #ffffff12;background:#ffffff08;border-radius:10px;color:#94a3b8;font-size:10px;line-height:1.5}.cp-vendor-help a{color:#fbbf24;font-weight:800;text-decoration:none}
 .cp-vendor-main{min-width:0;min-height:calc(100vh - 104px)}
 @media(max-width:1050px){.cp-vendor-app{grid-template-columns:1fr}.cp-vendor-sidebar{position:sticky;top:104px;height:auto;max-height:210px;border-right:0;border-bottom:1px solid #1f2937;padding:10px}.cp-vendor-brand{display:none}.cp-vendor-nav{display:flex;overflow:auto;gap:4px}.cp-vendor-nav a{white-space:nowrap}.cp-vendor-help{display:none}}
-</style></head><body>@include('layouts.header')<div class="cp-vendor-app"><aside class="cp-vendor-sidebar">
+.cp-nav-icon{width:17px;height:17px;display:inline-block;position:relative;flex:0 0 17px;opacity:.9}.cp-i-grid:before{content:"";position:absolute;inset:2px;border:1.5px solid currentColor;border-radius:3px}.cp-i-box:before{content:"";position:absolute;left:2px;top:5px;width:13px;height:10px;border:1.5px solid currentColor;border-radius:2px}.cp-i-box:after{content:"";position:absolute;left:5px;top:2px;width:7px;height:5px;border:1.5px solid currentColor;border-bottom:0}.cp-i-list:before{content:"";position:absolute;left:2px;top:3px;width:13px;height:2px;background:currentColor;box-shadow:0 5px currentColor,0 10px currentColor}.cp-i-stock:before{content:"";position:absolute;inset:3px;border:1.5px solid currentColor}.cp-i-price:before{content:"$";font-size:15px;font-weight:900;position:absolute;left:3px;top:-2px}.cp-i-chart:before{content:"";position:absolute;inset:3px;border-left:1.5px solid currentColor;border-bottom:1.5px solid currentColor}.cp-i-chart:after{content:"";position:absolute;left:5px;top:8px;width:9px;height:5px;border-left:1.5px solid currentColor;border-top:1.5px solid currentColor;transform:skewY(-35deg)}.cp-i-heart:before{content:"";position:absolute;left:3px;top:3px;width:11px;height:11px;border:1.5px solid currentColor;border-radius:7px;transform:rotate(45deg) scale(.72)}.cp-i-ring:before{content:"";position:absolute;inset:2px;border:1.5px solid currentColor;border-radius:50%}.cp-i-play:before{content:"";position:absolute;left:4px;top:2px;border-left:10px solid currentColor;border-top:6px solid transparent;border-bottom:6px solid transparent}.cp-i-tag:before{content:"";position:absolute;left:2px;top:4px;width:11px;height:8px;border:1.5px solid currentColor}.cp-i-truck:before{content:"";position:absolute;left:1px;top:5px;width:11px;height:7px;border:1.5px solid currentColor}.cp-i-wallet:before{content:"";position:absolute;left:1px;top:4px;width:14px;height:10px;border:1.5px solid currentColor}.cp-i-arrow:before{content:"↗";position:absolute;font-size:18px;top:-4px}.cp-i-return:before{content:"↶";position:absolute;font-size:18px;top:-4px}.cp-i-mail:before{content:"";position:absolute;left:1px;top:4px;width:14px;height:10px;border:1.5px solid currentColor}.cp-i-star:before{content:"★";position:absolute;font-size:15px;top:-3px}.cp-i-ai:before{content:"✦";position:absolute;font-size:16px;top:-3px}.cp-vendor-nav a{min-height:42px}.cp-vendor-nav a span{line-height:1.25}</style></head><body>@include('layouts.header')<div class="cp-vendor-app"><aside class="cp-vendor-sidebar">
   <div class="cp-vendor-brand">
     <a href="{{route('home')}}" class="cp-vendor-logo-link"><img src="{{asset('images/chacha-logo.svg')}}" alt="CHACHA 查查 Prime"></a>
     <div class="cp-vendor-brand-title">Seller Center</div>
     <div class="cp-vendor-brand-sub">Marketplace management</div>
   </div>
   <nav class="cp-vendor-nav">
-    <a class="{{request()->routeIs('vendor.dashboard')?'is-active':''}}" href="{{route('vendor.dashboard')}}">▦ <span>Overview</span></a>
-    <a class="{{request()->routeIs('vendor.products*')?'is-active':''}}" href="{{route('vendor.products')}}">▣ <span>Products</span></a>
-    <a class="{{request()->routeIs('vendor.orders*')?'is-active':''}}" href="{{route('vendor.orders')}}">▤ <span>Orders</span></a>
-    <a class="{{request()->routeIs('vendor.inventory')?'is-active':''}}" href="{{route('vendor.inventory')}}">◫ <span>Inventory</span></a>
-    <a class="{{request()->routeIs('vendor.pricing*')?'is-active':''}}" href="{{route('vendor.pricing')}}">◈ <span>B2B / B2C Pricing</span></a>
-    <a class="{{request()->routeIs('vendor.analytics')?'is-active':''}}" href="{{route('vendor.analytics')}}">◒ <span>Analytics</span></a>
-    <a class="{{request()->routeIs('vendor.account-health')?'is-active':''}}" href="{{route('vendor.account-health')}}">♥ <span>Account Health</span></a>
-    <a class="{{request()->routeIs('vendor.reports')?'is-active':''}}" href="{{route('vendor.reports')}}">▤ <span>Reports</span></a>
-    <a class="{{request()->routeIs('vendor.group-buying*')?'is-active':''}}" href="{{route('vendor.group-buying')}}">◎ <span>Group Buying</span></a>
-    <a class="{{request()->routeIs('vendor.live-commerce*')?'is-active':''}}" href="{{route('vendor.live-commerce')}}">▶ <span>Live Commerce</span></a>
-    <a class="{{request()->routeIs('vendor.coupons*')?'is-active':''}}" href="{{route('vendor.coupons')}}">◇ <span>Coupons</span></a>
-    <a class="{{request()->routeIs('vendor.shipping')?'is-active':''}}" href="{{route('vendor.shipping')}}">⌁ <span>Shipping</span></a>
-    <a class="{{request()->routeIs('vendor.wallet')?'is-active':''}}" href="{{route('vendor.wallet')}}">▱ <span>Wallet</span></a>
-    <a class="{{request()->routeIs('vendor.payouts*')?'is-active':''}}" href="{{route('vendor.payouts')}}">↗ <span>Payouts</span></a>
-    <a class="{{request()->routeIs('vendor.returns*')?'is-active':''}}" href="{{route('vendor.returns')}}">↩ <span>Returns & Refunds</span></a>
-    <a class="{{request()->routeIs('vendor.messages*')?'is-active':''}}" href="{{route('vendor.messages')}}">✉ <span>Customer Messages</span></a>
-    <a class="{{request()->routeIs('vendor.reviews')?'is-active':''}}" href="{{route('vendor.reviews')}}">★ <span>Reviews</span></a>
-    <a class="{{request()->routeIs('vendor.ai')?'is-active':''}}" href="{{route('vendor.ai')}}">✦ <span>AI Assistant</span></a>
+    <a class="{{request()->routeIs('vendor.dashboard')?'is-active':''}}" href="{{route('vendor.dashboard')}}"><i class="cp-nav-icon cp-i-grid"></i><span>Overview</span></a>
+    <a class="{{request()->routeIs('vendor.products*')?'is-active':''}}" href="{{route('vendor.products')}}"><i class="cp-nav-icon cp-i-box"></i><span>Products</span></a>
+    <a class="{{request()->routeIs('vendor.orders*')?'is-active':''}}" href="{{route('vendor.orders')}}"><i class="cp-nav-icon cp-i-list"></i><span>Orders</span></a>
+    <a class="{{request()->routeIs('vendor.inventory')?'is-active':''}}" href="{{route('vendor.inventory')}}"><i class="cp-nav-icon cp-i-stock"></i><span>Inventory</span></a>
+    <a class="{{request()->routeIs('vendor.pricing*')?'is-active':''}}" href="{{route('vendor.pricing')}}"><i class="cp-nav-icon cp-i-price"></i><span>B2B / B2C Pricing</span></a>
+    <a class="{{request()->routeIs('vendor.analytics')?'is-active':''}}" href="{{route('vendor.analytics')}}"><i class="cp-nav-icon cp-i-chart"></i><span>Analytics</span></a>
+    <a class="{{request()->routeIs('vendor.account-health')?'is-active':''}}" href="{{route('vendor.account-health')}}"><i class="cp-nav-icon cp-i-heart"></i><span>Account Health</span></a>
+    <a class="{{request()->routeIs('vendor.reports')?'is-active':''}}" href="{{route('vendor.reports')}}"><i class="cp-nav-icon cp-i-list"></i><span>Reports</span></a>
+    <a class="{{request()->routeIs('vendor.group-buying*')?'is-active':''}}" href="{{route('vendor.group-buying')}}"><i class="cp-nav-icon cp-i-ring"></i><span>Group Buying</span></a>
+    <a class="{{request()->routeIs('vendor.live-commerce*')?'is-active':''}}" href="{{route('vendor.live-commerce')}}"><i class="cp-nav-icon cp-i-play"></i><span>Live Commerce</span></a>
+    <a class="{{request()->routeIs('vendor.coupons*')?'is-active':''}}" href="{{route('vendor.coupons')}}"><i class="cp-nav-icon cp-i-tag"></i><span>Coupons</span></a>
+    <a class="{{request()->routeIs('vendor.shipping')?'is-active':''}}" href="{{route('vendor.shipping')}}"><i class="cp-nav-icon cp-i-truck"></i><span>Shipping</span></a>
+    <a class="{{request()->routeIs('vendor.wallet')?'is-active':''}}" href="{{route('vendor.wallet')}}"><i class="cp-nav-icon cp-i-wallet"></i><span>Wallet</span></a>
+    <a class="{{request()->routeIs('vendor.payouts*')?'is-active':''}}" href="{{route('vendor.payouts')}}"><i class="cp-nav-icon cp-i-arrow"></i><span>Payouts</span></a>
+    <a class="{{request()->routeIs('vendor.returns*')?'is-active':''}}" href="{{route('vendor.returns')}}"><i class="cp-nav-icon cp-i-return"></i><span>Returns & Refunds</span></a>
+    <a class="{{request()->routeIs('vendor.messages*')?'is-active':''}}" href="{{route('vendor.messages')}}"><i class="cp-nav-icon cp-i-mail"></i><span>Customer Messages</span></a>
+    <a class="{{request()->routeIs('vendor.reviews')?'is-active':''}}" href="{{route('vendor.reviews')}}"><i class="cp-nav-icon cp-i-star"></i><span>Reviews</span></a>
+    <a class="{{request()->routeIs('vendor.ai')?'is-active':''}}" href="{{route('vendor.ai')}}"><i class="cp-nav-icon cp-i-ai"></i><span>AI Assistant</span></a>
   </nav>
   <div class="cp-vendor-help">Need help? <a href="{{route('home')}}">Open Storefront</a> or contact Chacha Prime support.</div>
 </aside><main class="cp-vendor-main">@yield('content')</main></div><script src="{{asset('js/header.js')}}" defer></script>@stack('scripts')</body></html>
