@@ -1,0 +1,8 @@
+@extends('admin.layout')
+@section('title','Vendors — Chacha Prime')
+@section('page_heading','Vendor Management')
+@section('content')
+<div class="panel"><h2>Vendors</h2>@if(session('success'))<p style="color:#17652a">{{ session('success') }}</p>@endif
+<table style="width:100%;border-collapse:collapse"><tr><th align="left">Business</th><th>Owner</th><th>Status</th><th>Verification</th><th>Action</th></tr>
+@foreach($vendors as $vendor)<tr><td style="padding:12px 4px">{{ $vendor->business_name }}</td><td>{{ $vendor->user->name ?? '-' }}</td><td>{{ $vendor->status }}</td><td>{{ $vendor->verification_status }}</td><td><form method="POST" action="{{ route('admin.vendors.update',$vendor) }}" style="display:flex;gap:6px">@csrf<select name="status"><option value="pending">Pending</option><option value="active" @selected($vendor->status==='active')>Active</option><option value="suspended" @selected($vendor->status==='suspended')>Suspended</option><option value="rejected" @selected($vendor->status==='rejected')>Rejected</option></select><select name="verification_status"><option value="pending">Pending</option><option value="verified" @selected($vendor->verification_status==='verified')>Verified</option><option value="rejected" @selected($vendor->verification_status==='rejected')>Rejected</option></select><button class="button button-dark" type="submit">Save</button></form></td></tr>@endforeach</table>{{ $vendors->links() }}</div>
+@endsection
