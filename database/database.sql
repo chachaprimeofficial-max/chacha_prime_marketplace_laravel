@@ -209,11 +209,11 @@ INSERT IGNORE INTO permissions(name,description) VALUES
 ('staff.manage','Manage staff'),
 ('permissions.manage','Manage role permissions'),
 ('modules.manage','Manage platform modules'),
-('audit.view','View audit logs');
+('audit.view','View audit logs'),('support.view','View support conversations'),('support.manage','Manage support conversations'),('ai.copilot','Use admin AI copilot');
 
 INSERT IGNORE INTO role_permissions(role_id,permission_id)
 SELECT r.id,p.id FROM roles r CROSS JOIN permissions p WHERE r.name='staff' AND p.name IN
-('dashboard.view','users.view','vendors.manage','products.manage','categories.manage','orders.view','payments.view','modules.manage','audit.view');
+('dashboard.view','users.view','vendors.manage','products.manage','categories.manage','orders.view','payments.view','modules.manage','audit.view','support.view','support.manage','ai.copilot');
 
 INSERT IGNORE INTO currencies(code,name,symbol,rate_to_base,source) VALUES ('USD','US Dollar','$',1,'manual'),('PKR','Pakistani Rupee','Rs',1,'manual'),('CNY','Chinese Yuan','¥',1,'manual'),('AED','UAE Dirham','د.إ',1,'manual'),('EUR','Euro','€',1,'manual');
 INSERT IGNORE INTO payment_methods(code,name,type,enabled) VALUES ('pingpong','PingPong','gateway',0),('lianlianpay','LianLianPay','gateway',0),('worldfirst','WorldFirst','gateway',0),('alipay','Alipay','gateway',0),('wechat_pay','WeChat Pay','gateway',0),('visa','Visa','gateway',0),('mastercard','Mastercard','gateway',0),('amex','American Express','gateway',0),('paypal','PayPal','gateway',0),('easypaisa','Easypaisa','gateway',0),('jazzcash','JazzCash','gateway',0),('raast','Raast','gateway',0),('bank_transfer','Bank Transfer','bank',0),('cod','Cash on Delivery','cod',0);
