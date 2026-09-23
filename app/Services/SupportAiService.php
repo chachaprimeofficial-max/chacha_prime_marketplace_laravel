@@ -153,6 +153,10 @@ PROMPT;
             'order_id','vendor_id','product_id','product_name','sku','quantity','unit_price','subtotal','vendor_status'
         ]) : collect();
 
+        $payments = $orderIds ? DB::table('payments as p')->leftJoin('payment_methods as pm','pm.id','=','p.method_id')->whereIn('p.order_id',$orderIds)->get(['p.order_id','p.transaction_reference','p.amount','p.currency','p.status','p.paid_at','pm.name as method']) : collect();
+
+        $shipments = $orderIds ? DB::table('shipments as s')->leftJoin('shipping_methods as sm','sm.id','=','s.shipping_method_id')->whereIn('s.order_id',$orderIds)->get(['s.order_id','s.vendor_id','s.tracking_number','s.status','s.shipping_cost','s.shipped_at','s.delivered_at','sm.name as shipping_method']) : collect();
+
         $returns = DB::table('return_requests')
             ->where('customer_id', $user->id)->latest('id')->limit(10)->get([
                 'id','order_id','order_item_id','vendor_id','reason','details','refund_amount','currency','status','resolution_note','created_at'
@@ -180,6 +184,8 @@ PROMPT;
             ]);
         }
 
+        $notifications = DB::table('notifications')->where('user_id',$user->id)->latest('id')->limit(10)->get(['type','title','message','read_at','created_at']);
+
         $cart = DB::table('carts')->where('user_id',$user->id)->first();
         $cartItems = $cart ? DB::table('cart_items')->where('cart_id',$cart->id)->limit(20)->get(['product_id','variant_id','quantity','unit_price']) : collect();
 
@@ -193,7 +199,10 @@ PROMPT;
             ],
             'orders' => $orders,
             'order_items' => $items,
+            'payments' => $payments,
+            'shipments' => $shipments,
             'returns' => $returns,
+            'notifications' => $notifications,
             'matched_products' => $products,
             'cart' => $cartItems,
             'recent_support_messages' => $messages,
