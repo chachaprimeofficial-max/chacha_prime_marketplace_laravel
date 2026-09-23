@@ -23,14 +23,14 @@
 </div>
 <div class="cp-product-main">
 <section class="cp-product-card"><h2>Add New Product</h2><p class="sub">New listings enter the admin approval queue.</p>
-<form method="POST" action="{{route('vendor.products.store')}}" class="cp-product-form">@csrf
+<form method="POST" action="{{route('vendor.products.store')}}" enctype="multipart/form-data" class="cp-product-form">@csrf
 <label>Product name<input name="name" required placeholder="e.g. Premium Wireless Headphones"></label>
 <div class="row"><label>Category<select name="category_id"><option value="">Select</option>@foreach($categories as $c)<option value="{{$c->id}}">{{$c->name}}</option>@endforeach</select></label><label>Brand<select name="brand_id"><option value="">Select</option>@foreach($brands as $b)<option value="{{$b->id}}">{{$b->name}}</option>@endforeach</select></label></div>
 <div class="row"><label>Retail price<input name="retail_price" type="number" step="0.01" min="0" required></label><label>Cost price<input name="cost_price" type="number" step="0.01" min="0"></label></div>
 <div class="row"><label>Currency<select name="currency"><option>USD</option><option>PKR</option><option>CNY</option><option>AED</option><option>EUR</option></select></label><label>Stock<input name="stock" type="number" step="0.001" min="0" required></label></div>
 <label>SKU<input name="sku" placeholder="Optional — auto generated"></label>
 <label>Short description<input name="short_description" maxlength="1000"></label>
-<label>Full description<textarea name="description"></textarea></label>
+<label>Product images<input name="images[]" type="file" accept="image/jpeg,image/png,image/webp" multiple><small style="color:#94a3b8;font-weight:500">Upload up to 8 JPG, PNG or WebP images. The first image becomes the primary product image.</small></label><label>Full description<textarea name="description"></textarea></label>
 <button class="cp-product-submit">Submit for Approval →</button></form></section>
 <section class="cp-product-card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h2>Your Catalog</h2><p class="sub">Search, filter and manage your listings.</p></div></div>
 <form method="GET" class="cp-filter"><input name="q" value="{{$q}}" placeholder="Search product name or SKU"><select name="status"><option value="">All statuses</option>@foreach(['pending','published','draft','rejected','archived'] as $s)<option value="{{$s}}" @selected($status===$s)>{{ucfirst($s)}}</option>@endforeach</select><button>Filter</button><a href="{{route('vendor.products')}}">Reset</a></form>
