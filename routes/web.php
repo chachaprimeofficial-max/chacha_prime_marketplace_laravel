@@ -77,4 +77,16 @@ Route::middleware(['auth','role:super_admin,admin'])->prefix('admin')->name('adm
  Route::get('/cards',[AdminCommerceController::class,'cards'])->name('cards');
  Route::post('/cards',[AdminCommerceController::class,'issueCard'])->name('cards.issue');
 });
-Route::middleware('auth')->prefix('customer')->name('customer.')->group(function(){Route::view('/dashboard','customer.dashboard')->name('dashboard');});
+Route::middleware('auth')->prefix('customer')->name('customer.')->group(function(){
+ Route::get('/dashboard',[StorefrontController::class,'customerDashboard'])->name('dashboard');
+ Route::get('/orders',[StorefrontController::class,'customerOrders'])->name('orders');
+ Route::get('/orders/{id}',[StorefrontController::class,'orderDetail'])->name('order.detail');
+ Route::get('/wishlist',[StorefrontController::class,'wishlist'])->name('wishlist');
+ Route::post('/wishlist/{id}',[StorefrontController::class,'addWishlist'])->name('wishlist.add');
+ Route::delete('/wishlist/{id}',[StorefrontController::class,'removeWishlist'])->name('wishlist.remove');
+ Route::get('/addresses',[StorefrontController::class,'addresses'])->name('addresses');
+ Route::post('/addresses',[StorefrontController::class,'storeAddress'])->name('addresses.store');
+ Route::get('/wallet',[StorefrontController::class,'wallet'])->name('wallet');
+ Route::get('/virtual-card',[StorefrontController::class,'card'])->name('card');
+ Route::get('/notifications',[StorefrontController::class,'notifications'])->name('notifications');
+});
