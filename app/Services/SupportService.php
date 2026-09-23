@@ -21,7 +21,7 @@ class SupportService
 
     public function conversationForUser(int $userId, ?int $id = null)
     {
-        $q = DB::table('support_conversations')->where('customer_id', $userId);
+        $q = DB::table('support_conversations')->where('customer_id', $userId)->where('type', 'customer_support');
         return $id
             ? $q->where('id', $id)->first()
             : $q->whereIn('status', ['ai_handled','open','pending'])->latest('id')->first();
