@@ -1,6 +1,6 @@
 <?php
-namespace AppModels;
-use IlluminateDatabaseEloquentModel;
+namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
 class Product extends Model {
  protected $fillable=['vendor_id','category_id','brand_id','name','slug','sku','description','short_description','retail_price','cost_price','currency','stock','stock_status','status','featured','weight'];
  protected $casts=['retail_price'=>'decimal:2','cost_price'=>'decimal:2','stock'=>'decimal:3','featured'=>'boolean'];
