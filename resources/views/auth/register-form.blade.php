@@ -14,7 +14,7 @@
 <div class="field full"><span>Account type</span><div class="roles">
 <label class="role {{old('type',$type)==='customer'?'active':''}}"><input type="radio" name="type" value="customer" @checked(old('type',$type)==='customer')><b>B2C Customer</b><span>Retail shopping account</span></label>
 <label class="role {{old('type',$type)==='b2b_customer'?'active':''}}"><input type="radio" name="type" value="b2b_customer" @checked(old('type',$type)==='b2b_customer')><b>B2B Customer</b><span>Business purchasing account</span></label>
-<label class="role {{old('type',$type)==='vendor'?'active':''}}><input type="radio" name="type" value="vendor" @checked(old('type',$type)==='vendor')><b>Vendor / Seller</b><span>Sell products on Chacha Prime</span></label>
+<label class="role {{old('type',$type)==='vendor'?'active':''}}"><input type="radio" name="type" value="vendor" @checked(old('type',$type)==='vendor')><b>Vendor / Seller</b><span>Sell products on Chacha Prime</span></label>
 </div></div>
 <label class="field">Full name<input name="name" value="{{old('name')}}" autocomplete="name" required></label>
 <label class="field">Phone<input name="phone" value="{{old('phone')}}" autocomplete="tel"></label>
