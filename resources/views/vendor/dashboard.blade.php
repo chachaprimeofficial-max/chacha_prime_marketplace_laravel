@@ -81,6 +81,8 @@
         <a href="{{route('vendor.shipping')}}">⌁ <span>Shipping</span></a>
         <a href="{{route('vendor.wallet')}}">▱ <span>Wallet</span></a>
         <a href="{{route('vendor.payouts')}}">↗ <span>Payouts</span></a>
+        <a href="{{route('vendor.returns')}}">↩ <span>Returns & Refunds</span></a>
+        <a href="{{route('vendor.messages')}}">✉ <span>Customer Messages</span></a>
         <a href="{{route('vendor.reviews')}}">★ <span>Reviews</span></a>
         <a href="{{route('vendor.ai')}}">✦ <span>AI Assistant</span></a>
       </nav>
