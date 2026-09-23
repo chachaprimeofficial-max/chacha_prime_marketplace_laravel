@@ -13,6 +13,8 @@ class RoleMiddleware
         $user=$request->user();
         if(!$user || !in_array($user->role,$roles,true)) abort(403);
 
+        if($user->role==='super_admin') return $next($request);
+
         if(in_array($user->role,['staff','admin'],true) && !$this->allowed($user->role,$request)){
             abort(403,'You do not have permission for this action.');
         }
@@ -22,7 +24,7 @@ class RoleMiddleware
 
     protected function allowed(string $role, Request $request): bool
     {
-        if(in_array($role,['admin','super_admin'],true)) return true;
+        if($role==='super_admin') return true;
         $route=$request->route()?->getName() ?? '';
         $permissionMap=[
             'admin.dashboard'=>'dashboard.view','admin.users'=>'users.view','admin.users.update'=>'users.manage',
