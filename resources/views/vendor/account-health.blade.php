@@ -1,4 +1,4 @@
-@extends('layouts.storefront')
+@extends('vendor.layout')
 @section('title','Account Health — Seller Center')
 @push('styles')
 <style>
