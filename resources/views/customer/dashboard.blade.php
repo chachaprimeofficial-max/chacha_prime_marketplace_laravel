@@ -1,4 +1,4 @@
-@extends('layouts.storefront')
+@extends('layouts.customer')
 @section('title','Customer Dashboard — Chacha Prime')
 @push('styles')
 <style>
