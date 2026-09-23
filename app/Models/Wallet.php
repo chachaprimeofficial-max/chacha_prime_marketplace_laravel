@@ -1,6 +1,6 @@
 <?php
-namespace AppModels;
-use IlluminateDatabaseEloquentModel;
+namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
 class Wallet extends Model {
  protected $fillable=['user_id','currency','balance','status'];
  protected $casts=['balance'=>'decimal:2'];
