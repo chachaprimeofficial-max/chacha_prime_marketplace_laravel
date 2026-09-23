@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\ProductVideo;
 use App\Models\Vendor;
 use App\Services\AuditLogService;
 use Illuminate\Http\Request;
@@ -39,14 +40,14 @@ class VendorController extends Controller
  public function storeProduct(Request $request){
   $vendor=$this->vendor($request);
   $d=$request->validate(['name'=>'required|string|max:220','category_id'=>'nullable|exists:categories,id','brand_id'=>'nullable|exists:brands,id','short_description'=>'nullable|string|max:1000','description'=>'nullable|string','retail_price'=>'required|numeric|min:0','cost_price'=>'nullable|numeric|min:0','currency'=>'required|string|size:3','stock'=>'required|numeric|min:0','sku'=>'nullable|string|max:100','images'=>'nullable|array|max:8','images.*'=>'image|mimes:jpg,jpeg,png,webp|max:4096']);
-  $images=$request->file('images',[]);unset($d['images']);$d['vendor_id']=$vendor->id;$d['slug']=Str::slug($d['name']).'-'.Str::lower(Str::random(6));$d['sku']=$d['sku'] ?: 'CP-'.strtoupper(Str::random(8));$d['status']='pending';$d['stock_status']=$d['stock']>0?'in_stock':'out_of_stock';
-  $product=Product::create($d);$this->saveProductImages($request,$product,$images);app(AuditLogService::class)->log('vendor.product.created','Product',$product->id,['vendor_id'=>$vendor->id,'name'=>$product->name]);return back()->with('success','Product submitted for admin approval.');
+  $images=$request->file('images',[]);$videos=$request->file('videos',[]);unset($d['images'],$d['videos']);$d['vendor_id']=$vendor->id;$d['slug']=Str::slug($d['name']).'-'.Str::lower(Str::random(6));$d['sku']=$d['sku'] ?: 'CP-'.strtoupper(Str::random(8));$d['status']='pending';$d['stock_status']=$d['stock']>0?'in_stock':'out_of_stock';
+  $product=Product::create($d);$this->saveProductImages($request,$product,$images);$this->saveProductVideos($product,$videos);app(AuditLogService::class)->log('vendor.product.created','Product',$product->id,['vendor_id'=>$vendor->id,'name'=>$product->name]);return back()->with('success','Product submitted for admin approval.');
  }
 
  public function updateProduct(Request $request,int $id){
   $vendor=$this->vendor($request);$p=Product::where('vendor_id',$vendor->id)->findOrFail($id);
   $d=$request->validate(['name'=>'required|string|max:220','category_id'=>'nullable|exists:categories,id','brand_id'=>'nullable|exists:brands,id','short_description'=>'nullable|string|max:1000','description'=>'nullable|string','retail_price'=>'required|numeric|min:0','cost_price'=>'nullable|numeric|min:0','currency'=>'required|string|size:3','stock'=>'required|numeric|min:0','sku'=>'required|string|max:100','images'=>'nullable|array|max:8','images.*'=>'image|mimes:jpg,jpeg,png,webp|max:4096']);
-  $images=$request->file('images',[]);unset($d['images']);$d['stock_status']=$d['stock']>0?'in_stock':'out_of_stock';$before=$p->only(['name','retail_price','stock','status']);$p->update($d);$this->saveProductImages($request,$p,$images);app(AuditLogService::class)->log('vendor.product.updated','Product',$p->id,['before'=>$before,'after'=>$d]);return back()->with('success','Product updated.');
+  $images=$request->file('images',[]);unset($d['images']);$d['stock_status']=$d['stock']>0?'in_stock':'out_of_stock';$before=$p->only(['name','retail_price','stock','status']);$p->update($d);$this->saveProductImages($request,$p,$images);$this->saveProductVideos($p,$videos);app(AuditLogService::class)->log('vendor.product.updated','Product',$p->id,['before'=>$before,'after'=>$d]);return back()->with('success','Product updated.');
  }
 
  private function saveProductImages(Request $request, Product $product, array $files=[]): void
@@ -67,7 +68,9 @@ class VendorController extends Controller
   }
  }
 
- public function editProduct(Request $request,int $id){$vendor=$this->vendor($request);$product=Product::with('images')->where('vendor_id',$vendor->id)->findOrFail($id);$categories=DB::table('categories')->where('status',1)->orderBy('name')->get();return view('vendor.product-edit',compact('vendor','product','categories'));}
+ private function saveProductVideos(Product $product,array $files=[]): void { foreach($files as $file){ $path=$file->store('products/videos','public'); ProductVideo::create(['product_id'=>$product->id,'path'=>$path,'title'=>$product->name,'sort_order'=>((int)ProductVideo::where('product_id',$product->id)->max('sort_order'))+1]); } }
+
+ public function editProduct(Request $request,int $id){$vendor=$this->vendor($request);$product=Product::with(['images','videos','variants'])->where('vendor_id',$vendor->id)->findOrFail($id);$categories=DB::table('categories')->where('status',1)->orderBy('name')->get();return view('vendor.product-edit',compact('vendor','product','categories'));}
 
  public function deleteProduct(Request $request,int $id){$vendor=$this->vendor($request);$p=Product::where('vendor_id',$vendor->id)->findOrFail($id);$p->update(['status'=>'archived']);app(AuditLogService::class)->log('vendor.product.archived','Product',$p->id,['vendor_id'=>$vendor->id]);return back()->with('success','Product archived.');}
 
