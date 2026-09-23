@@ -39,19 +39,19 @@ class VendorController extends Controller
  public function storeProduct(Request $request){
   $vendor=$this->vendor($request);
   $d=$request->validate(['name'=>'required|string|max:220','category_id'=>'nullable|exists:categories,id','brand_id'=>'nullable|exists:brands,id','short_description'=>'nullable|string|max:1000','description'=>'nullable|string','retail_price'=>'required|numeric|min:0','cost_price'=>'nullable|numeric|min:0','currency'=>'required|string|size:3','stock'=>'required|numeric|min:0','sku'=>'nullable|string|max:100','images'=>'nullable|array|max:8','images.*'=>'image|mimes:jpg,jpeg,png,webp|max:4096']);
-  $d['vendor_id']=$vendor->id;$d['slug']=Str::slug($d['name']).'-'.Str::lower(Str::random(6));$d['sku']=$d['sku'] ?: 'CP-'.strtoupper(Str::random(8));$d['status']='pending';$d['stock_status']=$d['stock']>0?'in_stock':'out_of_stock';
-  $product=Product::create($d);$this->saveProductImages($request,$product);app(AuditLogService::class)->log('vendor.product.created','Product',$product->id,['vendor_id'=>$vendor->id,'name'=>$product->name]);return back()->with('success','Product submitted for admin approval.');
+  $images=$request->file('images',[]);unset($d['images']);$d['vendor_id']=$vendor->id;$d['slug']=Str::slug($d['name']).'-'.Str::lower(Str::random(6));$d['sku']=$d['sku'] ?: 'CP-'.strtoupper(Str::random(8));$d['status']='pending';$d['stock_status']=$d['stock']>0?'in_stock':'out_of_stock';
+  $product=Product::create($d);$this->saveProductImages($request,$product,$images);app(AuditLogService::class)->log('vendor.product.created','Product',$product->id,['vendor_id'=>$vendor->id,'name'=>$product->name]);return back()->with('success','Product submitted for admin approval.');
  }
 
  public function updateProduct(Request $request,int $id){
   $vendor=$this->vendor($request);$p=Product::where('vendor_id',$vendor->id)->findOrFail($id);
   $d=$request->validate(['name'=>'required|string|max:220','category_id'=>'nullable|exists:categories,id','brand_id'=>'nullable|exists:brands,id','short_description'=>'nullable|string|max:1000','description'=>'nullable|string','retail_price'=>'required|numeric|min:0','cost_price'=>'nullable|numeric|min:0','currency'=>'required|string|size:3','stock'=>'required|numeric|min:0','sku'=>'required|string|max:100','images'=>'nullable|array|max:8','images.*'=>'image|mimes:jpg,jpeg,png,webp|max:4096']);
-  $d['stock_status']=$d['stock']>0?'in_stock':'out_of_stock';$before=$p->only(['name','retail_price','stock','status']);$p->update($d);$this->saveProductImages($request,$p);app(AuditLogService::class)->log('vendor.product.updated','Product',$p->id,['before'=>$before,'after'=>$d]);return back()->with('success','Product updated.');
+  $images=$request->file('images',[]);unset($d['images']);$d['stock_status']=$d['stock']>0?'in_stock':'out_of_stock';$before=$p->only(['name','retail_price','stock','status']);$p->update($d);$this->saveProductImages($request,$p,$images);app(AuditLogService::class)->log('vendor.product.updated','Product',$p->id,['before'=>$before,'after'=>$d]);return back()->with('success','Product updated.');
  }
 
- private function saveProductImages(Request $request, Product $product): void
+ private function saveProductImages(Request $request, Product $product, array $files=[]): void
  {
-  $files=$request->file('images',[]);
+  if(!$files) $files=$request->file('images',[]);
   if(!$files) return;
   $hasPrimary=ProductImage::where('product_id',$product->id)->where('is_primary',1)->exists();
   foreach($files as $file){
