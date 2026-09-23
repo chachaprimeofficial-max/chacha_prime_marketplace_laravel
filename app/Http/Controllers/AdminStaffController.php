@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\AuditLogService;
 
 class AdminStaffController extends Controller
 {
@@ -22,7 +23,7 @@ class AdminStaffController extends Controller
             'role'=>'required|in:admin,staff',
             'status'=>'required|in:active,pending,blocked,suspended',
         ]);
-        DB::table('users')->where('id',$id)->whereIn('role',['admin','staff'])->update($data);
+        $before=DB::table('users')->where('id',$id)->whereIn('role',['admin','staff'])->first(); DB::table('users')->where('id',$id)->whereIn('role',['admin','staff'])->update($data); app(AuditLogService::class)->log('staff.updated','User',$id,['before'=>$before ? (array)$before : [],'after'=>$data]);
         return back()->with('success','Staff member updated.');
     }
 
@@ -35,10 +36,10 @@ class AdminStaffController extends Controller
         $roleId=DB::table('roles')->where('name',$role)->value('id');
         if(!$roleId) return back()->with('error','Role record not found.');
 
-        DB::table('role_permissions')->where('role_id',$roleId)->delete();
+        $before=DB::table('role_permissions')->where('role_id',$roleId)->pluck('permission_id')->all(); DB::table('role_permissions')->where('role_id',$roleId)->delete();
         foreach($data['permissions']??[] as $permissionId){
             DB::table('role_permissions')->insert(['role_id'=>$roleId,'permission_id'=>$permissionId,'created_at'=>now(),'updated_at'=>now()]);
         }
-        return back()->with('success','Permissions updated for the role.');
+        app(AuditLogService::class)->log('role.permissions.updated','Role',$roleId,['role'=>$role,'before'=>$before,'after'=>$data['permissions']??[]]); return back()->with('success','Permissions updated for the role.');
     }
 }
