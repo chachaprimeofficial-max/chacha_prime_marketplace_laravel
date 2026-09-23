@@ -28,6 +28,26 @@ class AdminController extends Controller
             'recentUsers'=>User::latest()->limit(8)->get(),
         ]);
     }
+    public function catalogTools(){
+        $imports=DB::table('catalog_imports')->latest('id')->paginate(15);
+        return view('admin.catalog-tools',['imports'=>$imports,'identifierCount'=>DB::table('product_identifiers')->count(),'subscriptionPlans'=>DB::table('subscription_plans')->where('status',1)->count()]);
+    }
+    public function storeSubscriptionPlan(Request $request){
+        $data=$request->validate(['name'=>'required|string|max:120','audience'=>'required|in:vendor,b2b_customer,customer','price'=>'required|numeric|min:0','currency'=>'required|string|size:3','billing_cycle'=>'required|in:monthly,yearly','product_limit'=>'nullable|integer|min:0','ai_limit'=>'nullable|integer|min:0','import_limit'=>'nullable|integer|min:0']);
+        $data['created_at']=now();$data['updated_at']=now();DB::table('subscription_plans')->insert($data);return back()->with('success','Subscription plan created.');
+    }
+    public function scanCenter(){return view('admin.scan-center');}
+    public function scanLookup(Request $request){
+        $q=trim((string)$request->input('q','')); abort_if($q==='','404');
+        $product=DB::table('product_identifiers')->join('products','products.id','=','product_identifiers.product_id')->leftJoin('vendors','vendors.id','=','products.vendor_id')->where(function($w)use($q){$w->where('product_identifiers.product_code',$q)->orWhere('product_identifiers.internal_sku',$q)->orWhere('product_identifiers.barcode_value',$q)->orWhere('product_identifiers.qr_token',$q)->orWhere('products.sku',$q); })->select('products.id','products.name','products.sku','products.status','products.stock','product_identifiers.*','vendors.business_name')->first();
+        $order=DB::table('orders')->where('order_number',$q)->first();
+        return view('admin.scan-center',['query'=>$q,'product'=>$product,'order'=>$order]);
+    }
+    public function ensureProductIdentifier(int $id){
+        $p=DB::table('products')->where('id',$id)->first();abort_unless($p,404);
+        $existing=DB::table('product_identifiers')->where('product_id',$id)->first();if(!$existing){$code='CP-PROD-'.str_pad((string)$id,8,'0',STR_PAD_LEFT);$sku=$p->sku ?: 'CP-'.strtoupper(substr(hash('sha256',$p->name.$id),0,10));$barcode='CP'.str_pad((string)$id,12,'0',STR_PAD_LEFT);$token=bin2hex(random_bytes(20));DB::table('product_identifiers')->insert(['product_id'=>$id,'product_code'=>$code,'internal_sku'=>$sku,'barcode_value'=>$barcode,'barcode_type'=>'CODE128','qr_token'=>$token,'created_at'=>now(),'updated_at'=>now()]);}
+        return back()->with('success','Product identifier generated.');
+    }
     public function users(){return view('admin.users',['users'=>User::latest()->paginate(20)]);}
     public function vendors(){return view('admin.vendors',['vendors'=>Vendor::with('user')->latest()->paginate(20)]);}
     public function products(){return view('admin.products',['products'=>Product::with(['vendor','category'])->latest()->paginate(20)]);}
