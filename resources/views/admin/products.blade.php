@@ -1,0 +1,8 @@
+@extends('admin.layout')
+@section('title','Products — Chacha Prime')
+@section('page_heading','Product Management')
+@section('content')
+<div class="panel"><h2>Products</h2>@if(session('success'))<p style="color:#17652a">{{ session('success') }}</p>@endif
+<form method="POST" action="{{ route('admin.products.store') }}" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:25px">@csrf<input name="vendor_id" placeholder="Vendor ID" required><input name="category_id" placeholder="Category ID"><input name="name" placeholder="Product name" required><input name="retail_price" placeholder="Retail price" required><input name="currency" value="USD" placeholder="Currency" required><input name="stock" placeholder="Stock" required><textarea name="description" placeholder="Description" style="grid-column:1/-1"></textarea><button class="button button-dark" type="submit">Create Product</button></form>
+<table style="width:100%;border-collapse:collapse"><tr><th align="left">Product</th><th>Vendor</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th></tr>@foreach($products as $product)<tr><td style="padding:12px 4px">{{ $product->name }}</td><td>{{ $product->vendor->business_name ?? '-' }}</td><td>{{ $product->category->name ?? '-' }}</td><td>{{ $product->retail_price }} {{ $product->currency }}</td><td>{{ $product->stock }}</td><td>{{ $product->status }}</td></tr>@endforeach</table>{{ $products->links() }}</div>
+@endsection
