@@ -17,7 +17,8 @@ class VendorController extends Controller
   $productIds=Product::where('vendor_id',$vendor->id)->pluck('id');
   $items=DB::table('order_items')->where('vendor_id',$vendor->id);
   $sales=(clone $items)->join('orders','orders.id','=','order_items.order_id')->whereIn('orders.payment_status',['paid'])->sum('order_items.subtotal');
-  return view('vendor.dashboard',['vendor'=>$vendor,'stats'=>[
+  $categories=DB::table('categories')->where('status',1)->orderBy('name')->get();
+  return view('vendor.dashboard',['vendor'=>$vendor,'categories'=>$categories,'stats'=>[
    'products'=>Product::where('vendor_id',$vendor->id)->count(),
    'published'=>Product::where('vendor_id',$vendor->id)->where('status','published')->count(),
    'pending'=>Product::where('vendor_id',$vendor->id)->where('status','pending')->count(),
