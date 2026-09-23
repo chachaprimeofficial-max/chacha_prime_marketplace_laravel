@@ -11,6 +11,7 @@ use App\Http\Controllers\AdminAuditLogController;
 use Illuminate\Support\Facades\Route;
 Route::get('/',[StorefrontController::class,'home'])->name('home');
 Route::get('/shop',[StorefrontController::class,'shop'])->name('shop');
+Route::get('/search',[StorefrontController::class,'search'])->name('search');
 Route::get('/product/{id}',[StorefrontController::class,'product'])->name('product');
 Route::get('/cart',[StorefrontController::class,'cart'])->name('cart');
 Route::get('/ai-assistant',[AiController::class,'index'])->name('ai.assistant');
@@ -24,6 +25,7 @@ Route::middleware('auth')->group(function(){
  Route::get('/customer/wishlist',[StorefrontController::class,'wishlist'])->name('customer.wishlist');
  Route::post('/customer/wishlist/{id}',[StorefrontController::class,'addWishlist'])->name('customer.wishlist.add');
 });
+Route::get('/live',fn()=>redirect()->route('customer.live-shopping'))->name('live');
 Route::post('/webhooks/payments/{provider}',[PaymentWebhookController::class,'handle'])->name('payments.webhook');
 Route::get('/health',fn()=>response()->json(['status'=>'ok','application'=>config('app.name'),'version'=>app()->version()]))->name('health');
 Route::prefix('auth')->name('auth.')->group(function(){
