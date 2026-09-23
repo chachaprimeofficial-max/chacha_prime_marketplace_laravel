@@ -9,7 +9,7 @@
 <button style="padding:11px 16px;border:0;border-radius:9px;background:#111827;color:#fff">Search</button>
 <button type="button" id="barcodeBtn" style="padding:11px 16px;border:1px solid #cbd5e1;border-radius:9px;background:#fff">📷 Scan</button>
 </form>
-<div id="scanner" style="display:none;margin-top:15px;padding:15px;background:#f8fafc;border-radius:12px"><div id="scannerHint">Camera barcode/QR scanning can be enabled with a browser-compatible scanner library.</div><button type="button" id="closeScanner">Close</button></div>
+<div id="scanner" style="display:none;margin-top:15px;padding:15px;background:#f8fafc;border-radius:12px"><div id="reader" style="max-width:420px"></div><div id="scannerHint">Allow camera access, then scan a Chacha QR/barcode.</div><button type="button" id="closeScanner">Close</button></div>
 </div>
 @if(isset($product) || isset($order))
 <div class="dashboard-two" style="margin-top:14px">
@@ -17,9 +17,9 @@
 @if($order)<section class="panel"><h2>Order Found</h2><p>Order: <b>{{$order->order_number}}</b></p><p>Status: {{$order->status}}</p><p>Payment: {{$order->payment_status}}</p><p>Total: {{$order->grand_total}} {{$order->currency}}</p><p>Created: {{$order->created_at}}</p></section>@endif
 </div>
 @endif
-<script>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script><script>
 const b=document.getElementById('barcodeBtn'),s=document.getElementById('scanner'),c=document.getElementById('closeScanner');
-b?.addEventListener('click',()=>{s.style.display='block';});
+b?.addEventListener("click",()=>{s.style.display="block"; const q=new Html5Qrcode("reader"); q.start({facingMode:"environment"},{fps:10,qrbox:250},code=>{document.getElementById("lookup").value=code;q.stop().then(()=>document.querySelector("form").submit())},()=>{}).catch(()=>{document.getElementById("scannerHint").textContent="Camera unavailable. You can enter the code manually.";});});
 c?.addEventListener('click',()=>{s.style.display='none';});
 </script>
 @endsection
