@@ -25,7 +25,7 @@ Route::middleware('auth')->group(function(){
  Route::get('/customer/wishlist',[StorefrontController::class,'wishlist'])->name('customer.wishlist');
  Route::post('/customer/wishlist/{id}',[StorefrontController::class,'addWishlist'])->name('customer.wishlist.add');
 });
-Route::get('/live',fn()=>redirect()->route('customer.live-shopping'))->name('live');
+Route::get('/live',[StorefrontController::class,'liveShopping'])->name('live');
 Route::post('/webhooks/payments/{provider}',[PaymentWebhookController::class,'handle'])->name('payments.webhook');
 Route::get('/health',fn()=>response()->json(['status'=>'ok','application'=>config('app.name'),'version'=>app()->version()]))->name('health');
 Route::prefix('auth')->name('auth.')->group(function(){
