@@ -11,18 +11,22 @@
 @if(session('success'))<div class="notice">{{session('success')}}</div>@endif
 @if($errors->any())<div class="notice" style="background:#fef3f2;color:#b42318;border-color:#fecdca">{{implode(' ', $errors->all())}}</div>@endif
 @if($product->images->count())<h3 style="margin:0 0 4px;font-size:14px">Current product images</h3><p style="margin:0 0 8px">These images are already attached to this listing.</p><div class="gallery">@foreach($product->images as $img)<figure><img src="{{asset('storage/'.$img->path)}}" alt="{{e($img->alt_text ?: $product->name)}}"><figcaption>{{$img->is_primary?'Primary image':'Product image'}}</figcaption></figure>@endforeach</div>@else<div class="notice" style="background:#fffbeb;color:#92400e;border-color:#fedf89">No product images uploaded yet.</div>@endif
-<form method="POST" action="{{route('vendor.products.update',$product->id)}}" enctype="multipart/form-data" class="cp-edit-form">@csrf
-<label>Product name<input name="name" value="{{$product->name}}" required></label>
-<label>Category<select name="category_id"><option value="">Category</option>@foreach($categories as $c)<option value="{{$c->id}}" @selected($c->id==$product->category_id)>{{$c->name}}</option>@endforeach</select></label>
-<label>Retail price<input name="retail_price" type="number" step="0.01" value="{{$product->retail_price}}" required></label>
-<label>Cost price<input name="cost_price" type="number" step="0.01" value="{{$product->cost_price}}"></label>
-<label>Currency<input name="currency" value="{{$product->currency}}" required></label>
-<label>Stock<input name="stock" type="number" step="0.001" value="{{$product->stock}}" required></label>
-<label>SKU<input name="sku" value="{{$product->sku}}" required></label>
-<label class="full">Add more images<input name="images[]" type="file" accept="image/jpeg,image/png,image/webp" multiple><small style="color:#94a3b8">Up to 8 images per upload.</small></label>
+<form method="POST" action="{{route('vendor.products.update',$product->id)}}" enctype="multipart/form-data" class="cp-edit-form" id="cpEditProductForm">@csrf
+<label>Product title<input name="name" value="{{$product->name}}" required></label><label>Category<select name="category_id"><option value="">Category</option>@foreach($categories as $cat)<option value="{{$cat->id}}" @selected($cat->id==$product->category_id)>{{$cat->name}}</option>@endforeach</select></label>
+<label>Product ID / SKU<input name="sku" value="{{$product->sku}}" required></label><label>Brand ID<input name="brand_id" value="{{$product->brand_id}}"></label>
+<label>Retail price<input name="retail_price" type="number" step="0.01" value="{{$product->retail_price}}" required></label><label>Wholesale price<input name="wholesale_price" type="number" step="0.01" value="{{$product->wholesale_price}}"></label>
+<label>Factory price<input name="factory_price" type="number" step="0.01" value="{{$product->factory_price}}"></label><label>Cost price<input name="cost_price" type="number" step="0.01" value="{{$product->cost_price}}"></label>
+<label>Currency<input name="currency" value="{{$product->currency}}" required></label><label>Stock<input name="stock" type="number" step="0.001" value="{{$product->stock}}" required></label>
+<label>Return policy<input name="return_policy" value="{{$product->return_policy ?: '30 days refund / replacement'}}"></label>
 <label class="full">Short description<input name="short_description" value="{{$product->short_description}}"></label>
-<label class="full">Description<textarea name="description">{{$product->description}}</textarea></label>
-<div class="full"><button class="btn">Save Product Changes →</button></div></form>
+<label class="full">Highlights<textarea name="highlights">{{$product->highlights}}</textarea></label><label class="full">Description<textarea name="description">{{$product->description}}</textarea></label>
+<label class="full">Specifications<textarea name="specifications">{{$product->specifications}}</textarea></label><label class="full">Shipping<textarea name="shipping_info">{{$product->shipping_info}}</textarea></label>
+<label class="full">Features<textarea name="features">{{$product->features}}</textarea></label><label class="full">Additional details<textarea name="additional_details">{{$product->additional_details}}</textarea></label>
+<label class="full">Video URLs<textarea name="video_urls">{{$product->video_urls}}</textarea></label>
+<label class="full">Add more images<input name="images[]" id="cpEditImages" type="file" accept="image/jpeg,image/png,image/webp" multiple><small style="color:#94a3b8">New images are added to the existing gallery.</small><div id="cpEditPreview" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px"></div></label>
+<label class="full">Add product videos<input name="videos[]" type="file" accept="video/mp4,video/webm,video/quicktime" multiple></label>
+<div class="full"><button class="btn">Save Complete Product Listing →</button></div></form>
 <div class="danger"><form method="POST" action="{{route('vendor.products.delete',$product->id)}}">@csrf @method('DELETE')<button class="archive">Archive Product</button></form></div>
 </div></div></div>
+@push('scripts')<script>const i=document.getElementById('cpEditImages'),p=document.getElementById('cpEditPreview');if(i&&p)i.addEventListener('change',()=>{p.innerHTML='';Array.from(i.files).slice(0,8).forEach(f=>{const r=new FileReader();r.onload=e=>{const d=document.createElement('div');d.innerHTML='<img src="'+e.target.result+'" style="width:100%;height:90px;object-fit:contain;border:1px solid #e5e7eb;border-radius:8px">';p.appendChild(d)};r.readAsDataURL(f)})});</script>@endpush
 @endsection
