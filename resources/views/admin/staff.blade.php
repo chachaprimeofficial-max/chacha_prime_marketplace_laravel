@@ -5,7 +5,7 @@
 @if(session('success'))<div class="notice">{{session('success')}}</div>@endif
 @if(session('error'))<div class="notice" style="background:#fff0f0">{{session('error')}}</div>@endif
 <div class="panel">
-<div class="module-head"><div><h1>Staff Management</h1><p>Manage admin staff and role-level permissions.</p></div></div>
+<div class="module-head"><div><h1>Staff Management</h1><p>Manage admin staff and role-level permissions. Only the Super Admin can assign or change permissions.</p></div></div>
 <div class="table-wrap"><table><thead><tr><th>Staff</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody>
 @foreach($staff as $member)
 <tr><td><strong>{{$member->name}}</strong><br><small>#{{$member->id}}</small></td><td>{{$member->email}}</td><td>{{$member->role}}</td><td>{{$member->status}}</td><td class="actions"><details><summary class="button button-dark">Manage</summary>
@@ -15,7 +15,7 @@
 <select name="status">@foreach(['active','pending','blocked','suspended'] as $st)<option value="{{$st}}" @selected($member->status===$st)>{{$st}}</option>@endforeach</select>
 <button class="button button-dark">Save</button></form>
 <form method="POST" action="{{route('admin.staff.permissions',$member->id)}}" class="permission-box">@csrf
-<strong>Role permissions</strong><div class="permission-grid">@foreach($permissions as $permission)<label><input type="checkbox" name="permissions[]" value="{{$permission->id}}"> {{$permission->name}}</label>@endforeach</div>
+<strong>Role permissions</strong><div class="permission-grid">@foreach($permissions as $permission)<label><input type="checkbox" name="permissions[]" value="{{$permission->id}}" @checked(in_array($permission->id,$rolePermissionMap[$member->role]??[]))> {{$permission->name}}</label>@endforeach</div>
 <button class="button button-dark">Save Permissions</button></form>
 </details></td></tr>
 @endforeach
