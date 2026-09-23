@@ -53,6 +53,8 @@ Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->gr
  Route::delete('/pricing/{id}',[VendorController::class,'deletePricing'])->name('pricing.delete');
  Route::get('/inventory',[VendorController::class,'inventory'])->name('inventory');
  Route::get('/analytics',[VendorController::class,'analytics'])->name('analytics');
+ Route::get('/account-health',[VendorController::class,'accountHealth'])->name('account-health');
+ Route::get('/reports',[VendorController::class,'reports'])->name('reports');
  Route::get('/shipping',[VendorController::class,'shipping'])->name('shipping');
  Route::get('/coupons',[VendorController::class,'coupons'])->name('coupons');
  Route::post('/coupons',[VendorController::class,'storeCoupon'])->name('coupons.store');
