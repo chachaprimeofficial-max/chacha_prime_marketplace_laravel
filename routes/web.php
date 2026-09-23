@@ -6,6 +6,7 @@ use App\Http\Controllers\VendorController;
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\PaymentWebhookController;
+use App\Http\Controllers\AdminStaffController;
 use Illuminate\Support\Facades\Route;
 Route::get('/',[StorefrontController::class,'home'])->name('home');
 Route::get('/shop',[StorefrontController::class,'shop'])->name('shop');
@@ -61,6 +62,9 @@ Route::middleware(['auth','role:super_admin,admin'])->prefix('admin')->name('adm
  Route::get('/',fn()=>redirect()->route('admin.dashboard'));
  Route::get('/dashboard',[AdminController::class,'dashboard'])->name('dashboard');
  Route::get('/users',[AdminController::class,'users'])->name('users');
+ Route::get('/staff',[AdminStaffController::class,'index'])->name('staff');
+ Route::post('/staff/{id}',[AdminStaffController::class,'update'])->name('staff.update');
+ Route::post('/staff/{id}/permissions',[AdminStaffController::class,'assignPermissions'])->name('staff.permissions');
  Route::post('/users/{user}',[AdminController::class,'updateUser'])->name('users.update');
  Route::get('/vendors',[AdminController::class,'vendors'])->name('vendors');
  Route::post('/vendors/{vendor}',[AdminController::class,'updateVendor'])->name('vendors.update');
