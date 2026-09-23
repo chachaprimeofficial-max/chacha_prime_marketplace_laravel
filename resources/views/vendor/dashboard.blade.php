@@ -73,6 +73,8 @@
         <a href="{{route('vendor.inventory')}}">◫ <span>Inventory</span></a>
         <a href="{{route('vendor.pricing')}}">◈ <span>B2B / B2C Pricing</span></a>
         <a href="{{route('vendor.analytics')}}">◒ <span>Analytics</span></a>
+        <a href="{{route('vendor.account-health')}}">♥ <span>Account Health</span></a>
+        <a href="{{route('vendor.reports')}}">▤ <span>Reports</span></a>
         <a href="{{route('vendor.group-buying')}}">◎ <span>Group Buying</span></a>
         <a href="{{route('vendor.live-commerce')}}">▶ <span>Live Commerce</span></a>
         <a href="{{route('vendor.coupons')}}">◇ <span>Coupons</span></a>
