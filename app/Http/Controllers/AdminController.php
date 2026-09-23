@@ -78,6 +78,22 @@ class AdminController extends Controller
         DB::table($schema['table'])->insert($data); return back()->with('success',$schema['table'].' record created.');
     }
 
+    public function updateModule(Request $request,string $module,int $id){
+        $schemas=[
+            'brands'=>['table'=>'brands','fields'=>['name'=>'required|string|max:150','logo'=>'nullable|string|max:500']],
+            'coupons'=>['table'=>'coupons','fields'=>['code'=>'required|string|max:80','type'=>'required|string|max:20','value'=>'required|numeric|min:0','min_order'=>'nullable|numeric|min:0','max_discount'=>'nullable|numeric|min:0']],
+            'currencies'=>['table'=>'currencies','fields'=>['name'=>'required|string|max:80','symbol'=>'nullable|string|max:10','rate_to_base'=>'required|numeric|min:0']],
+            'payment-methods'=>['table'=>'payment_methods','fields'=>['name'=>'required|string|max:120','type'=>'required|string|max:30']],
+            'shipping'=>['table'=>'shipping_methods','fields'=>['name'=>'required|string|max:120','provider'=>'nullable|string|max:100','mode'=>'required|string|max:20']],
+            'pages'=>['table'=>'pages','fields'=>['slug'=>'required|string|max:180','title'=>'required|string|max:220','content'=>'nullable|string']],
+        ];
+        abort_unless(isset($schemas[$module]),404); $schema=$schemas[$module]; $data=$request->validate($schema['fields']); $data['updated_at']=now();
+        DB::table($schema['table'])->where('id',$id)->update($data); return back()->with('success','Record updated.');
+    }
+    public function deleteModule(string $module,int $id){
+        $tables=['brands'=>'brands','coupons'=>'coupons','currencies'=>'currencies','payment-methods'=>'payment_methods','shipping'=>'shipping_methods','pages'=>'pages'];
+        abort_unless(isset($tables[$module]),404); DB::table($tables[$module])->where('id',$id)->delete(); return back()->with('success','Record deleted.');
+    }
     public function toggle(Request $request,string $module,int $id){
         $tables=['brands'=>'brands','reviews'=>'reviews','coupons'=>'coupons','shipping'=>'shipping_methods','currencies'=>'currencies','payment-methods'=>'payment_methods','pages'=>'pages','group-buying'=>'group_buying_campaigns','live-commerce'=>'live_streams'];
         abort_unless(isset($tables[$module]),404); $table=$tables[$module]; $row=DB::table($table)->where('id',$id)->first(); abort_unless($row,404);
