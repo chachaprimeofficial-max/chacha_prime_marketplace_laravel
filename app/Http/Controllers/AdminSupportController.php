@@ -102,6 +102,22 @@ class AdminSupportController extends Controller
         return back()->with('success','Assignment updated.');
     }
 
+    public function aiCopilot()
+    {
+        return view('admin.ai-copilot');
+    }
+
+    public function aiCopilotAsk(Request $request, \App\Services\AdminAiService $ai)
+    {
+        $data=$request->validate(['message'=>'required|string|max:2000']);
+        try {
+            return response()->json(['ok'=>true,'answer'=>$ai->ask($request->user()->id,$data['message'])]);
+        } catch (\Throwable $e) {
+            report($e);
+            return response()->json(['ok'=>false,'message'=>'AI copilot is temporarily unavailable.'],500);
+        }
+    }
+
     public function settings(Request $request)
     {
         $data=$request->validate([
