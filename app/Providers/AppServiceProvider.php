@@ -20,7 +20,6 @@ class AppServiceProvider extends ServiceProvider
                 ->where('status', 1)
                 ->orderBy('sort_order')
                 ->orderBy('name')
-                ->limit(10)
                 ->get());
 
             $view->with('cartCount', collect(session('cart', []))
