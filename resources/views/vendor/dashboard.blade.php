@@ -1,0 +1,5 @@
+@extends('layouts.storefront')
+@section('title','Vendor Dashboard — Chacha Prime')
+@section('content')
+<section class="dashboard-shell"><div class="dashboard-hero"><span class="eyebrow">VENDOR CENTER</span><h1>Seller dashboard</h1><p>Manage products, orders, pricing tiers, shipping, live commerce and performance.</p></div><div class="dashboard-grid"><article class="dashboard-card"><span>Products</span><strong>0</strong><small>Catalog items</small></article><article class="dashboard-card"><span>Orders</span><strong>0</strong><small>Vendor orders</small></article><article class="dashboard-card"><span>Sales</span><strong>$0</strong><small>Gross sales</small></article><article class="dashboard-card"><span>Live</span><strong>0</strong><small>Live sessions</small></article></div></section>
+@endsection
