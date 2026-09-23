@@ -30,3 +30,21 @@
 .cp-category-direct{position:absolute;inset:0;z-index:0}
 .cp-category-group:has(.cp-subcategories) .cp-category-title{position:relative;z-index:1}
 @media(max-width:767px){.cp-search-category{flex-basis:105px}.cp-search-category-menu{width:245px;max-height:290px}.cp-search-category-btn{font-size:11px;padding:0 8px}}
+
+/* Header interaction polish */
+.cp-search-icon{display:inline-block;width:16px;height:16px;border:2px solid #111;border-radius:50%;position:relative;vertical-align:-2px}
+.cp-search-icon:after{content:"";position:absolute;width:7px;border-top:2px solid #111;right:-5px;bottom:-2px;transform:rotate(45deg)}
+.cp-search>button{display:grid;place-items:center}
+.cp-category-direct-link{position:relative;inset:auto;display:flex;align-items:center;justify-content:space-between;padding:13px 22px;color:#111;text-decoration:none;font-weight:800;font-size:14px}
+.cp-category-direct-link:hover{background:#f7f7f7;color:#c45500}
+.cp-category-direct-link span:last-child{font-size:22px;color:#64748b}
+.cp-all-link{display:flex;align-items:center;gap:7px}
+.cp-lang .cp-chevron,.cp-account .cp-chevron{font-size:11px}
+@media(max-width:767px){
+ .cp-top-inner{gap:8px}
+ .cp-search{height:44px}
+ .cp-search-category{flex-basis:110px}
+ .cp-search-category-menu{z-index:1500}
+ .cp-drawer{width:min(390px,92vw)}
+ .cp-nav-link{font-size:12px}
+}
