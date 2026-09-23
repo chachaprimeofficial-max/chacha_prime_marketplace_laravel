@@ -80,7 +80,19 @@ class VendorController extends Controller
 
  public function ai(Request $request){$vendor=$this->vendor($request);$logs=DB::table('ai_logs')->where('user_id',$request->user()->id)->latest()->paginate(20);return view('vendor.ai',compact('vendor','logs'));}
  public function payouts(Request $request){$vendor=$this->vendor($request);$wallet=DB::table('wallets')->where('user_id',$request->user()->id)->first();$transactions=$wallet?DB::table('wallet_transactions')->where('wallet_id',$wallet->id)->latest()->paginate(20):collect();return view('vendor.payouts',compact('vendor','wallet','transactions'));}
- public function orders(Request $request){$vendor=$this->vendor($request);$orders=DB::table('orders')->join('order_items','orders.id','=','order_items.order_id')->where('order_items.vendor_id',$vendor->id)->select('orders.id','orders.order_number','orders.status','orders.payment_status','orders.fulfillment_status','orders.grand_total','orders.currency')->distinct()->latest('orders.id')->paginate(20);return view('vendor.orders',compact('vendor','orders'));}
+ public function orders(Request $request){
+  $vendor=$this->vendor($request); $q=trim((string)$request->get('q','')); $status=$request->get('status'); $payment=$request->get('payment'); $fulfillment=$request->get('fulfillment');
+  $base=DB::table('orders')->join('order_items','orders.id','=','order_items.order_id')->where('order_items.vendor_id',$vendor->id);
+  $query=(clone $base)->when($q,fn($x)=>$x->where('orders.order_number','like','%'.$q.'%'))->when($status,fn($x)=>$x->where('orders.status',$status))->when($payment,fn($x)=>$x->where('orders.payment_status',$payment))->when($fulfillment,fn($x)=>$x->where('orders.fulfillment_status',$fulfillment))->select('orders.id','orders.order_number','orders.status','orders.payment_status','orders.fulfillment_status','orders.grand_total','orders.currency','orders.created_at')->distinct();
+  return view('vendor.orders',['vendor'=>$vendor,'orders'=>$query->latest('orders.id')->paginate(20)->withQueryString(),'orderStats'=>[
+   'total'=>(clone $base)->distinct('orders.id')->count('orders.id'),
+   'pending'=>(clone $base)->where('orders.status','pending')->distinct('orders.id')->count('orders.id'),
+   'processing'=>(clone $base)->where('orders.status','processing')->distinct('orders.id')->count('orders.id'),
+   'paid'=>(clone $base)->where('orders.payment_status','paid')->distinct('orders.id')->count('orders.id'),
+   'shipped'=>(clone $base)->where('orders.fulfillment_status','shipped')->distinct('orders.id')->count('orders.id'),
+   'delivered'=>(clone $base)->where('orders.fulfillment_status','delivered')->distinct('orders.id')->count('orders.id'),
+  ],'q'=>$q,'status'=>$status,'payment'=>$payment,'fulfillment'=>$fulfillment]);
+ }
  public function updateOrder(Request $request,int $id){$vendor=$this->vendor($request);$d=$request->validate(['status'=>'required|in:pending,processing,cancelled','fulfillment_status'=>'required|in:unfulfilled,processing,shipped,delivered']);$owns=DB::table('order_items')->where('vendor_id',$vendor->id)->where('order_id',$id)->exists();abort_unless($owns,404);DB::table('orders')->where('id',$id)->update(['status'=>$d['status'],'fulfillment_status'=>$d['fulfillment_status'],'updated_at'=>now()]);return back()->with('success','Order updated.');}
  public function wallet(Request $request){$vendor=$this->vendor($request);$wallet=DB::table('wallets')->where('user_id',$request->user()->id)->first();return view('vendor.wallet',compact('vendor','wallet'));}
  public function reviews(Request $request){$vendor=$this->vendor($request);$productIds=Product::where('vendor_id',$vendor->id)->pluck('id');return view('vendor.reviews',['vendor'=>$vendor,'reviews'=>DB::table('reviews')->whereIn('product_id',$productIds)->latest()->paginate(20)]);}
