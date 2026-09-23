@@ -150,8 +150,8 @@ Route::middleware('auth')->prefix('customer')->name('customer.')->group(function
  Route::get('/notifications',[StorefrontController::class,'notifications'])->name('notifications');
  Route::get('/support',[SupportController::class,'customer'])->name('support');
  Route::post('/support',[SupportController::class,'startCustomerSupport'])->name('support.start');
- Route::post('/support/{id}',[SupportController::class,'customerMessage'])->name('support.message');
  Route::post('/support/vendor/{vendorId}',[SupportController::class,'startVendorConversation'])->name('support.vendor.start');
+ Route::post('/support/{id}',[SupportController::class,'customerMessage'])->name('support.message');
  Route::get('/group-buying',[StorefrontController::class,'groupBuying'])->name('group-buying');
  Route::post('/group-buying/{id}/join',[StorefrontController::class,'joinGroup'])->name('group-buying.join');
  Route::get('/live-shopping',[StorefrontController::class,'liveShopping'])->name('live-shopping');
