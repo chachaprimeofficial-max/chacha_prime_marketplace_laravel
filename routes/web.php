@@ -1,6 +1,7 @@
 <?php
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminCommerceController;
 use Illuminate\Support\Facades\Route;
 Route::get('/',fn()=>view('storefront.home'))->name('home');
 Route::get('/health',fn()=>response()->json(['status'=>'ok','application'=>config('app.name'),'version'=>app()->version()]))->name('health');
@@ -28,5 +29,13 @@ Route::middleware(['auth','role:super_admin,admin'])->prefix('admin')->name('adm
  Route::post('/products',[AdminController::class,'storeProduct'])->name('products.store');
  Route::get('/categories',[AdminController::class,'categories'])->name('categories');
  Route::post('/categories',[AdminController::class,'storeCategory'])->name('categories.store');
+ Route::get('/orders',[AdminCommerceController::class,'orders'])->name('orders');
+ Route::post('/orders/{order}',[AdminCommerceController::class,'updateOrder'])->name('orders.update');
+ Route::get('/payments',[AdminCommerceController::class,'payments'])->name('payments');
+ Route::post('/payments/{payment}',[AdminCommerceController::class,'updatePayment'])->name('payments.update');
+ Route::get('/wallets',[AdminCommerceController::class,'wallets'])->name('wallets');
+ Route::post('/wallets/{wallet}/adjust',[AdminCommerceController::class,'adjustWallet'])->name('wallets.adjust');
+ Route::get('/cards',[AdminCommerceController::class,'cards'])->name('cards');
+ Route::post('/cards',[AdminCommerceController::class,'issueCard'])->name('cards.issue');
 });
 Route::middleware('auth')->prefix('customer')->name('customer.')->group(function(){Route::view('/dashboard','customer.dashboard')->name('dashboard');});
