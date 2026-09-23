@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Services\TotpService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -17,7 +18,7 @@ class AuthController extends Controller {
         $data=$request->validate(['name'=>'required|string|max:120','email'=>'required|email|max:190|unique:users,email','phone'=>'nullable|string|max:40','password'=>'required|string|min:8|confirmed','type'=>'required|in:customer,b2b_customer,vendor']);
         $secret=$totp->generateSecret();
         $user=User::create(['name'=>$data['name'],'email'=>$data['email'],'phone'=>$data['phone']??null,'password'=>$data['password'],'role'=>$data['type'],'status'=>$data['type']==='vendor'?'pending':'active','totp_secret'=>encrypt($secret),'two_factor_enabled'=>true]);
-        if($user->role==='vendor') Vendor::create(['user_id'=>$user->id,'business_name'=>$user->name,'status'=>'pending']);
+        if($user->role==='vendor') Vendor::create(['user_id'=>$user->id,'business_name'=>$user->name,'status'=>'pending']); DB::table('wallets')->insert(['user_id'=>$user->id,'currency'=>'USD','balance'=>0,'status'=>'active','created_at'=>now(),'updated_at'=>now()]);
         $this->sendOtp($user);
         session(['pending_auth_user'=>$user->id,'show_totp_setup'=>true]);
         return redirect()->route('auth.otp')->with('success','Verification code sent to your email.');
