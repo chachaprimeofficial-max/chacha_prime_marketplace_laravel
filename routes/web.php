@@ -9,6 +9,8 @@ use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\AdminStaffController;
 use App\Http\Controllers\AdminAuditLogController;
 use App\Http\Controllers\RoleDashboardController;
+use App\Http\Controllers\SupportController;
+use App\Http\Controllers\AdminSupportController;
 use Illuminate\Support\Facades\Route;
 Route::get('/',[StorefrontController::class,'home'])->name('home');
 Route::get('/shop',[StorefrontController::class,'shop'])->name('shop');
@@ -78,8 +80,10 @@ Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->gr
  Route::post('/payouts',[VendorController::class,'requestPayout'])->name('payouts.request');
  Route::get('/returns',[VendorController::class,'returns'])->name('returns');
  Route::post('/returns/{id}',[VendorController::class,'updateReturn'])->name('returns.update');
- Route::get('/messages',[VendorController::class,'messages'])->name('messages');
- Route::post('/messages',[VendorController::class,'sendMessage'])->name('messages.send');
+ Route::get('/messages',[SupportController::class,'vendorMessages'])->name('messages');
+ Route::post('/messages/support',[SupportController::class,'vendorSupportStart'])->name('messages.support.start');
+ Route::post('/messages/support/{id}',[SupportController::class,'vendorSupportMessage'])->name('messages.support.send');
+ Route::post('/messages/customer/{id}',[SupportController::class,'vendorCustomerMessage'])->name('messages.customer.send');
  Route::get('/orders',[VendorController::class,'orders'])->name('orders');
  Route::post('/orders/{id}',[VendorController::class,'updateOrder'])->name('orders.update');
  Route::get('/wallet',[VendorController::class,'wallet'])->name('wallet');
@@ -102,6 +106,12 @@ Route::middleware(['auth','role:super_admin,admin,staff'])->prefix('admin')->nam
  Route::get('/users',[AdminController::class,'users'])->name('users');
  Route::get('/staff',[AdminStaffController::class,'index'])->name('staff');
  Route::get('/audit-logs',[AdminAuditLogController::class,'index'])->name('audit-logs');
+ Route::get('/support',[AdminSupportController::class,'index'])->name('support');
+ Route::get('/support/{id}',[AdminSupportController::class,'show'])->name('support.thread');
+ Route::post('/support/{id}/message',[AdminSupportController::class,'message'])->name('support.message');
+ Route::post('/support/{id}/status',[AdminSupportController::class,'status'])->name('support.status');
+ Route::post('/support/{id}/assign',[AdminSupportController::class,'assign'])->name('support.assign');
+ Route::post('/support/settings',[AdminSupportController::class,'settings'])->name('support.settings');
  Route::post('/staff/{id}',[AdminStaffController::class,'update'])->name('staff.update');
  Route::post('/staff/{id}/permissions',[AdminStaffController::class,'assignPermissions'])->middleware('role:super_admin')->name('staff.permissions');
 
@@ -138,6 +148,10 @@ Route::middleware('auth')->prefix('customer')->name('customer.')->group(function
  Route::get('/wallet',[StorefrontController::class,'wallet'])->name('wallet');
  Route::get('/virtual-card',[StorefrontController::class,'card'])->name('card');
  Route::get('/notifications',[StorefrontController::class,'notifications'])->name('notifications');
+ Route::get('/support',[SupportController::class,'customer'])->name('support');
+ Route::post('/support',[SupportController::class,'startCustomerSupport'])->name('support.start');
+ Route::post('/support/{id}',[SupportController::class,'customerMessage'])->name('support.message');
+ Route::post('/support/vendor/{vendorId}',[SupportController::class,'startVendorConversation'])->name('support.vendor.start');
  Route::get('/group-buying',[StorefrontController::class,'groupBuying'])->name('group-buying');
  Route::post('/group-buying/{id}/join',[StorefrontController::class,'joinGroup'])->name('group-buying.join');
  Route::get('/live-shopping',[StorefrontController::class,'liveShopping'])->name('live-shopping');
