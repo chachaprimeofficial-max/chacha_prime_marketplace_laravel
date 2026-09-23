@@ -20,7 +20,7 @@
 </section>
 <section class="panel">
 <h2>AI Product Builder</h2><form id="aiProductForm" style="display:grid;gap:8px"><textarea id="aiInput" rows="4" placeholder="Example: Samsung Galaxy A55 5G 256GB Black..."></textarea><button type="submit" style="padding:10px;border:0;border-radius:9px;background:#111827;color:#fff">Generate Product Content</button></form><pre id="aiResult" style="white-space:pre-wrap;font-size:10px;max-height:180px;overflow:auto"></pre>
-</section><section class="panel">
+</section><section class="panel"><h2>AI Category Builder</h2><form id="catAi"><textarea id="catInput" rows="3" placeholder="Example: Mobile Phones & Accessories"></textarea><button style="padding:10px;border:0;border-radius:9px;background:#111827;color:#fff">Generate Category</button></form><pre id="catOut" style="white-space:pre-wrap;font-size:10px;max-height:160px;overflow:auto"></pre></section><section class="panel">
 <h2>Subscription Plans</h2>
 <form method="POST" action="{{route('admin.subscription-plans.store')}}" style="display:grid;gap:8px">@csrf
 <input name="name" placeholder="Plan name" required><select name="audience"><option value="vendor">Vendor</option><option value="b2b_customer">B2B Customer</option><option value="customer">Customer</option></select>
