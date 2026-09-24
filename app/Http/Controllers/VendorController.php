@@ -140,6 +140,22 @@ class VendorController extends Controller
 
  public function aiProductBuilder(Request $request){$data=$request->validate(['input'=>'required|string|max:2000']);try{app(SubscriptionLimitService::class)->assertWithin($request->user()->id,'ai_used',1);}catch(\Throwable $e){return response()->json(['ok'=>false,'message'=>$e->getMessage()],429);} $prompt="Return JSON only with keys title,short_description,highlights,description,specifications,features,seo_title,seo_description,keywords,category_suggestion. Create marketplace product content from: ".$data['input'];$raw=app(\App\Services\GeminiService::class)->ask($prompt);app(SubscriptionLimitService::class)->consume($request->user()->id,'ai_used',1);DB::table('ai_logs')->insert(['user_id'=>$request->user()->id,'context'=>'vendor_product_builder','provider'=>'gemini','model'=>config('services.gemini.model'),'prompt'=>$data['input'],'response'=>$raw,'created_at'=>now()]);return response()->json(['ok'=>true,'data'=>json_decode($raw,true),'raw'=>$raw]);}
  public function ai(Request $request){$vendor=$this->vendor($request);$logs=DB::table('ai_logs')->where('user_id',$request->user()->id)->latest()->paginate(20);return view('vendor.ai',compact('vendor','logs'));}
+ public function requestPayout(Request $request){
+  $vendor=$this->vendor($request);
+  $data=$request->validate(['amount'=>'required|numeric|min:1','method'=>'nullable|string|max:60','destination'=>'nullable|string|max:190']);
+  $wallet=DB::table('wallets')->where('user_id',$request->user()->id)->first();
+  abort_unless($wallet,422,'Marketplace wallet is not available.');
+  $amount=(float)$data['amount'];
+  DB::transaction(function()use($wallet,$vendor,$amount,$data,$request){
+   $locked=DB::table('wallets')->where('id',$wallet->id)->lockForUpdate()->first();
+   if((float)$locked->balance<$amount) abort(422,'Insufficient wallet balance.');
+   $newBalance=(float)$locked->balance-$amount;
+   DB::table('wallets')->where('id',$locked->id)->update(['balance'=>$newBalance,'updated_at'=>now()]);
+   $payoutId=DB::table('vendor_payouts')->insertGetId(['vendor_id'=>$vendor->id,'wallet_id'=>$locked->id,'amount'=>$amount,'currency'=>$locked->currency ?? 'USD','method'=>$data['method']??null,'destination'=>$data['destination']??null,'status'=>'requested','notes'=>'Amount reserved from seller wallet at payout request.','created_at'=>now(),'updated_at'=>now()]);
+   DB::table('wallet_transactions')->insert(['wallet_id'=>$locked->id,'type'=>'debit','amount'=>$amount,'balance_after'=>$newBalance,'reference_type'=>'vendor_payout','reference_id'=>$payoutId,'description'=>'Payout amount reserved','created_at'=>now()]);
+  });
+  return back()->with('success','Payout request submitted and the amount has been reserved.');
+ }
  public function payouts(Request $request){$vendor=$this->vendor($request);$wallet=DB::table('wallets')->where('user_id',$request->user()->id)->first();$transactions=$wallet?DB::table('wallet_transactions')->where('wallet_id',$wallet->id)->latest()->paginate(20):collect();return view('vendor.payouts',compact('vendor','wallet','transactions'));}
  public function orders(Request $request){
   $vendor=$this->vendor($request); $q=trim((string)$request->get('q','')); $status=$request->get('status'); $payment=$request->get('payment'); $fulfillment=$request->get('fulfillment');
