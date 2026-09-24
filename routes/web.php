@@ -68,6 +68,9 @@ Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->gr
  Route::get('/account-health',[VendorController::class,'accountHealth'])->name('account-health');
  Route::get('/reports',[VendorController::class,'reports'])->name('reports');
  Route::get('/shipping',[VendorController::class,'shipping'])->name('shipping');
+ Route::post('/shipping/zones',[VendorController::class,'storeShippingZone'])->name('shipping.zones.store');
+ Route::post('/shipping/methods',[VendorController::class,'storeShippingMethod'])->name('shipping.methods.store');
+ Route::post('/shipping/methods/{id}/toggle',[VendorController::class,'toggleShippingMethod'])->name('shipping.methods.toggle');
  Route::get('/coupons',[VendorController::class,'coupons'])->name('coupons');
  Route::post('/coupons',[VendorController::class,'storeCoupon'])->name('coupons.store');
  Route::get('/group-buying',[VendorController::class,'groupBuying'])->name('group-buying');
