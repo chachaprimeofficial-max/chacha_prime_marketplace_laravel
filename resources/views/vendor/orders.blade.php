@@ -37,7 +37,7 @@
 <td><span class="badge {{$o->fulfillment_status}}">{{$o->fulfillment_status}}</span></td>
 <td><form class="order-form" method="POST" action="{{route('vendor.orders.update',$o->id)}}">@csrf
 <select name="status"><option value="pending" @selected($o->status==='pending')>Pending</option><option value="processing" @selected($o->status==='processing')>Processing</option><option value="cancelled" @selected($o->status==='cancelled')>Cancelled</option></select>
-<select name="fulfillment_status"><option value="unfulfilled" @selected($o->fulfillment_status==='unfulfilled')>Unfulfilled</option><option value="processing" @selected($o->fulfillment_status==='processing')>Processing</option><option value="shipped" @selected($o->fulfillment_status==='shipped')>Shipped</option><option value="delivered" @selected($o->fulfillment_status==='delivered')>Delivered</option></select>
+<input name="tracking_number" value="" placeholder="Tracking #"><select name="fulfillment_status"><option value="unfulfilled" @selected($o->fulfillment_status==='unfulfilled')>Unfulfilled</option><option value="processing" @selected($o->fulfillment_status==='processing')>Processing</option><option value="shipped" @selected($o->fulfillment_status==='shipped')>Shipped</option><option value="delivered" @selected($o->fulfillment_status==='delivered')>Delivered</option></select>
 <button>Save</button></form></td>
 </tr>@empty<tr><td colspan="6">No orders match your filters.</td></tr>@endforelse
 </tbody></table></div><div style="margin-top:14px">{{$orders->links()}}</div>
