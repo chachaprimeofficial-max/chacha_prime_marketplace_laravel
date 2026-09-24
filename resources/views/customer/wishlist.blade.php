@@ -13,16 +13,16 @@
 @if($items->count())
 <div class="cp-wish-grid">
 @foreach($items as $i)
-@php($product=AppModelsProduct::with('images')->find($i->product_id))
+@php($product=\App\Models\Product::find($i->product_id))
 <article class="cp-wish-card">
-<a class="cp-wish-image" href="{{route('product',$i->product_id)}}">@if($product && $product->images->first())<img src="{{asset('storage/'.$product->images->first()->path)}}" alt="{{e($i->name)}}">@else<span>No image</span>@endif</a>
+<a class="cp-wish-image" href="{{route('product',$i->product_id)}}">@if(!empty($i->image_path))<img src="{{asset('storage/'.$i->image_path)}}" alt="{{e($i->name)}}">@else<span>No image</span>@endif</a>
 <div class="cp-wish-body">
-<a class="cp-wish-name" href="{{route('product',$i->product_id)}}">{{IlluminateSupportStr::limit($i->name,65)}}</a>
+<a class="cp-wish-name" href="{{route('product',$i->product_id)}}">{{\Illuminate\Support\Str::limit($i->name,65)}}</a>
 <div class="cp-wish-meta">Marketplace price for selected country</div>
 <div class="cp-wish-price">{{number_format((float)$i->marketplace_price,2)}} {{strtoupper($i->marketplace_currency ?? 'USD')}}</div>
-<div class="cp-wish-stock {{$i->marketplace_stock>0?'ok':'out'}}">{{$i->marketplace_stock>0 ? $i->marketplace_stock.' available' : 'Currently unavailable'}}</div>
+<div class="cp-wish-stock {{$i->marketplace_available && $i->marketplace_stock>0?'ok':'out'}}">@if(!$i->marketplace_available)Not available in selected marketplace @elseif($i->marketplace_stock>0){{$i->marketplace_stock}} available @else Currently unavailable @endif</div>
 <div class="cp-wish-actions">
-@if($i->marketplace_stock>0)<form method="POST" action="{{route('cart.add',$i->product_id)}}">@csrf<input type="hidden" name="quantity" value="1"><button class="cp-wish-btn primary" type="submit">Move to cart</button></form>@else<a class="cp-wish-btn" href="{{route('product',$i->product_id)}}">View product</a>@endif
+@if($i->marketplace_available && $i->marketplace_stock>0)<form method="POST" action="{{route('cart.add',$i->product_id)}}">@csrf<input type="hidden" name="quantity" value="1"><button class="cp-wish-btn primary" type="submit">Move to cart</button></form>@else<a class="cp-wish-btn" href="{{route('product',$i->product_id)}}">View product</a>@endif
 <form method="POST" action="{{route('customer.wishlist.remove',$i->product_id)}}">@csrf @method('DELETE')<button class="cp-wish-btn" type="submit">Remove</button></form>
 </div>
 </div>
