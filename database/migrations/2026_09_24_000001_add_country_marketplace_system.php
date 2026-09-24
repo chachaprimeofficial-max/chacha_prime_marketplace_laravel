@@ -9,6 +9,7 @@ return new class extends Migration {
    Schema::create('countries',function(Blueprint $t){$t->id();$t->string('code',2)->unique();$t->string('name',100);$t->string('flag',10)->nullable();$t->char('currency_code',3)->default('USD');$t->boolean('active')->default(true);$t->unsignedInteger('sort_order')->default(0);$t->timestamps();$t->index(['active','sort_order']);});
   }
   if(!Schema::hasColumn('users','country_id')) Schema::table('users',fn(Blueprint $t)=>$t->foreignId('country_id')->nullable()->after('locale')->constrained('countries')->nullOnDelete());
+  if(!Schema::hasColumn('orders','country_id')) Schema::table('orders',fn(Blueprint $t)=>$t->foreignId('country_id')->nullable()->after('user_id')->constrained('countries')->nullOnDelete());
   if(!Schema::hasColumn('products','country_id')) Schema::table('products',fn(Blueprint $t)=>$t->foreignId('country_id')->nullable()->after('vendor_id')->constrained('countries')->nullOnDelete());
   if(!Schema::hasTable('product_marketplaces')){
    Schema::create('product_marketplaces',function(Blueprint $t){$t->id();$t->foreignId('product_id')->constrained('products')->cascadeOnDelete();$t->foreignId('country_id')->constrained('countries')->cascadeOnDelete();$t->char('currency',3)->nullable();$t->decimal('retail_price',18,2)->nullable();$t->decimal('wholesale_price',18,2)->nullable();$t->decimal('shipping_price',18,2)->default(0);$t->decimal('tax_rate',8,4)->default(0);$t->boolean('active')->default(true);$t->unsignedDecimal('stock',18,3)->nullable();$t->timestamps();$t->unique(['product_id','country_id']);$t->index(['country_id','active']);});
@@ -22,6 +23,7 @@ return new class extends Migration {
  }
  public function down(): void {
   if(Schema::hasTable('product_marketplaces')) Schema::drop('product_marketplaces');
+  if(Schema::hasColumn('orders','country_id')) Schema::table('orders',fn(Blueprint $t)=>$t->dropConstrainedForeignId('country_id'));
   if(Schema::hasColumn('products','country_id')) Schema::table('products',fn(Blueprint $t)=>$t->dropConstrainedForeignId('country_id'));
   if(Schema::hasColumn('users','country_id')) Schema::table('users',fn(Blueprint $t)=>$t->dropConstrainedForeignId('country_id'));
   Schema::dropIfExists('countries');
