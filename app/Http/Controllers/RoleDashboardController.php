@@ -18,7 +18,7 @@ class RoleDashboardController extends Controller
   return view('role-dashboard',[
    'role'=>'Courier / Delivery Center','eyebrow'=>'DELIVERY OPERATIONS',
    'intro'=>'Delivery workspace for assigned marketplace fulfillment.',
-   'stats'=>[['Assigned Shipments',DB::table('shipments')->count(),'Marketplace shipments'],['Pending',DB::table('shipments')->whereIn('status',['pending','processing'])->count(),'Needs fulfillment'],['Status',ucfirst($request->user()->status),'Account status']],
+   'stats'=>[['Assigned Shipments',DB::table('shipments')->where('courier_user_id',$request->user()->id)->count(),'My assigned shipments'],['Pending',DB::table('shipments')->where('courier_user_id',$request->user()->id)->whereIn('status',['pending','processing'])->count(),'My pending shipments'],['Status',ucfirst($request->user()->status),'Account status']],
    'actions'=>[['Marketplace Orders','View delivery order area',route('shop')],['Customer Account','Open account',route('customer.dashboard')],['Live Shopping','View marketplace live',route('live')]]
   ]);
  }
