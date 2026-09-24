@@ -127,7 +127,30 @@ class VendorController extends Controller
   return view('vendor.reports',compact('vendor','days','rows'));
  }
 
- public function shipping(Request $request){$vendor=$this->vendor($request);$methods=DB::table('shipping_methods')->where('enabled',1)->orderBy('name')->get();return view('vendor.shipping',compact('vendor','methods'));}
+ public function shipping(Request $request){
+  $vendor=$this->vendor($request);
+  $countries=DB::table('countries')->where('active',1)->orderBy('sort_order')->orderBy('name')->get();
+  $zones=DB::table('shipping_zones')->where('vendor_id',$vendor->id)->orWhereNull('vendor_id')->orderBy('country_id')->get();
+  $methods=DB::table('shipping_methods')->join('shipping_zones','shipping_zones.id','=','shipping_methods.shipping_zone_id')->join('countries','countries.id','=','shipping_zones.country_id')->where(function($q)use($vendor){$q->where('shipping_zones.vendor_id',$vendor->id)->orWhereNull('shipping_zones.vendor_id');})->select('shipping_methods.*','shipping_zones.name as zone_name','shipping_zones.vendor_id','countries.name as country_name','countries.code as country_code')->orderBy('countries.sort_order')->orderBy('shipping_methods.name')->get();
+  return view('vendor.shipping',compact('vendor','countries','zones','methods'));
+}
+public function storeShippingZone(Request $request){
+  $vendor=$this->vendor($request);
+  $d=$request->validate(['country_id'=>'required|exists:countries,id','name'=>'required|string|max:120','active'=>'nullable|boolean']);
+  $d['vendor_id']=$vendor->id;$d['active']=(int)($d['active']??0);$d['created_at']=now();$d['updated_at']=now();
+  DB::table('shipping_zones')->insert($d);return back()->with('success','Seller shipping zone created.');
+}
+public function storeShippingMethod(Request $request){
+  $vendor=$this->vendor($request);
+  $d=$request->validate(['shipping_zone_id'=>'required|exists:shipping_zones,id','name'=>'required|string|max:120','code'=>'required|string|max:60','rate_type'=>'required|in:flat,weight,free','base_rate'=>'required|numeric|min:0','per_kg_rate'=>'nullable|numeric|min:0','free_over'=>'nullable|numeric|min:0','min_weight'=>'nullable|numeric|min:0','max_weight'=>'nullable|numeric|min:0','min_days'=>'required|integer|min:0|max:365','max_days'=>'required|integer|min:0|max:365','currency'=>'required|string|max:10','active'=>'nullable|boolean']);
+  abort_unless(DB::table('shipping_zones')->where('id',$d['shipping_zone_id'])->where('vendor_id',$vendor->id)->exists(),403);
+  $d['active']=(int)($d['active']??0);$d['per_kg_rate']=$d['per_kg_rate']??0;$d['created_at']=now();$d['updated_at']=now();
+  DB::table('shipping_methods')->insert($d);return back()->with('success','Seller shipping method created.');
+}
+public function toggleShippingMethod(Request $request,int $id){
+  $vendor=$this->vendor($request);$row=DB::table('shipping_methods')->join('shipping_zones','shipping_zones.id','=','shipping_methods.shipping_zone_id')->where('shipping_methods.id',$id)->where('shipping_zones.vendor_id',$vendor->id)->select('shipping_methods.*')->first();abort_unless($row,404);
+  DB::table('shipping_methods')->where('id',$id)->update(['active'=>((int)$row->active)?0:1,'updated_at'=>now()]);return back()->with('success','Shipping method status updated.');
+}
 
  public function coupons(Request $request){$vendor=$this->vendor($request);$coupons=DB::table('coupons')->where('vendor_id',$vendor->id)->latest()->paginate(20)->withQueryString();return view('vendor.coupons',compact('vendor','coupons'));}
 
