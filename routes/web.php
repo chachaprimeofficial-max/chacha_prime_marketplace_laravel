@@ -105,6 +105,8 @@ Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->gr
  Route::post('/orders/{id}',[VendorController::class,'updateOrder'])->name('orders.update');
  Route::get('/wallet',[VendorController::class,'wallet'])->name('wallet');
  Route::get('/reviews',[VendorController::class,'reviews'])->name('reviews');
+ Route::get('/settings',[VendorController::class,'settings'])->name('settings');
+ Route::post('/settings',[VendorController::class,'updateSettings'])->name('settings.update');
 });
 Route::middleware(['auth','role:super_admin,admin,staff'])->prefix('admin')->name('admin.')->group(function(){
  Route::get('/',fn()=>redirect()->route('admin.dashboard'));
