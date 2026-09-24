@@ -39,6 +39,14 @@ class AuthController extends Controller {
         $this->sendOtp($user); session(['pending_auth_user'=>$user->id]);
         return redirect()->route('auth.otp')->with('success','Verification code sent to your email.');
     }
+    public function resendOtp(Request $request){
+        $id=session('pending_auth_user');
+        abort_unless($id,403);
+        $user=User::findOrFail($id);
+        $this->sendOtp($user);
+        return back()->with('success','A new verification code has been sent.');
+    }
+
     public function otp(){abort_unless(session('pending_auth_user'),403);return view('auth.otp');}
     public function verifyOtp(Request $request,TotpService $totp){
         $request->validate(['code'=>'required|digits:6']);
