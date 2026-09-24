@@ -30,15 +30,18 @@ class VendorController extends Controller
   $productIds=Product::where('vendor_id',$vendor->id)->pluck('id');
   $items=DB::table('order_items')->where('vendor_id',$vendor->id);
   $sales=(clone $items)->join('orders','orders.id','=','order_items.order_id')->whereIn('orders.payment_status',['paid'])->sum('order_items.subtotal');
+  $ordersCount=(clone $items)->distinct('order_id')->count('order_id');
+  $productsCount=Product::where('vendor_id',$vendor->id)->count();
+  $lowStock=Product::where('vendor_id',$vendor->id)->where('stock','<=',10)->count();
+  $outOfStock=Product::where('vendor_id',$vendor->id)->where('stock','<=',0)->count();
+  $pendingReturns=DB::table('return_requests')->where('vendor_id',$vendor->id)->whereIn('status',['requested','pending','approved'])->count();
+  $unreadMessages=DB::table('support_conversations')->where('vendor_id',$vendor->id)->whereIn('status',['open','pending'])->count();
   $categories=DB::table('categories')->where('status',1)->orderBy('name')->get();
-  return view('vendor.dashboard',['vendor'=>$vendor,'categories'=>$categories,'stats'=>[
-   'products'=>Product::where('vendor_id',$vendor->id)->count(),
-   'published'=>Product::where('vendor_id',$vendor->id)->where('status','published')->count(),
-   'pending'=>Product::where('vendor_id',$vendor->id)->where('status','pending')->count(),
-   'orders'=>(clone $items)->distinct('order_id')->count('order_id'),
-   'sales'=>$sales,
-   'reviews'=>DB::table('reviews')->whereIn('product_id',$productIds)->count(),
-   'low_stock'=>Product::where('vendor_id',$vendor->id)->where('stock','<=',10)->count(),
+  $countries=DB::table('countries')->where('active',1)->orderBy('sort_order')->orderBy('name')->get();
+  $marketplaceListings=DB::table('product_marketplaces')->join('products','products.id','=','product_marketplaces.product_id')->where('products.vendor_id',$vendor->id)->where('product_marketplaces.active',1)->distinct('product_marketplaces.country_id')->count('product_marketplaces.country_id');
+  $recentOrders=DB::table('orders')->join('order_items','order_items.order_id','=','orders.id')->where('order_items.vendor_id',$vendor->id)->select('orders.id','orders.order_number','orders.currency','orders.grand_total','orders.status','orders.fulfillment_status','orders.created_at')->distinct()->latest('orders.created_at')->limit(8)->get();
+  return view('vendor.dashboard',['vendor'=>$vendor,'categories'=>$categories,'countries'=>$countries,'recentOrders'=>$recentOrders,'stats'=>[
+   'products'=>$productsCount,'published'=>Product::where('vendor_id',$vendor->id)->where('status','published')->count(),'pending'=>Product::where('vendor_id',$vendor->id)->where('status','pending')->count(),'orders'=>$ordersCount,'sales'=>$sales,'reviews'=>DB::table('reviews')->whereIn('product_id',$productIds)->count(),'low_stock'=>$lowStock,'out_of_stock'=>$outOfStock,'pending_returns'=>$pendingReturns,'unread_messages'=>$unreadMessages,'marketplace_listings'=>$marketplaceListings,
   ],'recentProducts'=>Product::where('vendor_id',$vendor->id)->latest()->limit(8)->get()]);
  }
 
