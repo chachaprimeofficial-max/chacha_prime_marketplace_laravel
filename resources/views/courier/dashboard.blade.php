@@ -1,2 +1,7 @@
-@extends('role-dashboard')
-@section('content')@endsection
+@extends('admin.layout')
+@section('title','Courier Center — Chacha Prime')
+@section('page_heading','Courier Delivery Center')
+@section('content')
+<div style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:20px;margin-bottom:15px"><div style="font-size:10px;font-weight:900;letter-spacing:1.5px;color:#d97706">DELIVERY OPERATIONS</div><h2 style="margin:6px 0">My Assigned Shipments</h2><p style="color:#64748b;font-size:12px">Update only shipments assigned to your courier account.</p></div>
+<div class="panel" style="overflow:auto">@if(session('success'))<div class="notice">{{session('success')}}</div>@endif<table style="min-width:850px"><thead><tr><th>Order</th><th>Seller</th><th>Tracking</th><th>Status</th><th>Action</th></tr></thead><tbody>@forelse($shipments as $s)<tr><td>#{{$s->order_number}}</td><td>{{e($s->business_name)}}</td><td>{{e($s->tracking_number ?: '—')}}</td><td>{{$s->status}}</td><td><form method="POST" action="{{route('courier.shipments.update',$s->id)}}" style="display:flex;gap:6px">@csrf<select name="status">@foreach(['pending','picked_up','processing','shipped','delivered'] as $st)<option value="{{$st}}" @selected($s->status===$st)>{{ucwords(str_replace('_',' ',$st))}}</option>@endforeach</select><input name="tracking_number" value="{{e($s->tracking_number)}}" placeholder="Tracking #"><button>Update</button></form></td></tr>@empty<tr><td colspan="5">No shipments assigned.</td></tr>@endforelse</tbody></table>{{$shipments->links()}}</div>
+@endsection
