@@ -9,26 +9,26 @@
 <div class="cp-home">
 @include('partials.hero-carousel')
 <div class="cp-home-wrap">
-<section class="cp-home-section cp-department-section"><div class="cp-home-title"><h2>Shop by Department</h2><a href="{{route('shop')}}">All departments →</a></div><div class="cp-departments">@foreach($categories as $cat)<a href="{{route('shop')}}?category={{$cat->id}}"><span class="cp-dept-icon">{{mb_strtoupper(mb_substr($cat->name,0,1))}}</span><b>{{\Illuminate\Support\Str::limit($cat->name,24)}}</b><small>Shop now →</small></a>@endforeach</div></section>
+<section class="cp-home-section cp-department-section"><div class="cp-home-title"><h2>Shop by Department</h2><a href="{{route('shop')}}">All departments</a></div><div class="cp-departments">@foreach($categories as $cat)<a href="{{route('shop')}}?category={{$cat->id}}"><span class="cp-dept-icon">{{mb_strtoupper(mb_substr($cat->name,0,1))}}</span><b>{{\Illuminate\Support\Str::limit($cat->name,24)}}</b><small>Shop now</small></a>@endforeach</div></section>
 
 <section class="cp-home-strip">
-<a class="cp-home-tile live" href="{{route('live')}}"><b>Live Commerce</b><span>Watch sellers • shop while they stream →</span></a>
-<a class="cp-home-tile group" href="{{route('group-buying')}}"><b>Group Buying</b><span>Join offers from all sellers →</span></a>
-<a class="cp-home-tile coupon" href="{{route('shop')}}?deals=1"><b>Coupons & Deals</b><span>Exclusive marketplace savings →</span></a>
-<a class="cp-home-tile sell" href="{{auth()->user()?->role==='vendor'?route('vendor.dashboard'):route('vendor.register')}}"><b>Sell on CHACHA</b><span>Grow your business with us →</span></a>
+<a class="cp-home-tile live" href="{{route('live')}}"><b>Live Commerce</b><span>Watch sellers and shop while they stream</span></a>
+<a class="cp-home-tile group" href="{{route('group-buying')}}"><b>Group Buying</b><span>Join offers from all sellers</span></a>
+<a class="cp-home-tile coupon" href="{{route('shop')}}?deals=1"><b>Coupons & Deals</b><span>Exclusive marketplace savings</span></a>
+<a class="cp-home-tile sell" href="{{auth()->user()?->role==='vendor'?route('vendor.dashboard'):route('vendor.register')}}"><b>Sell on CHACHA</b><span>Grow your business with us</span></a>
 </section>
 
-<section class="cp-home-section"><div class="cp-home-title"><h2>Featured Products</h2><a href="{{route('shop')}}">See all products →</a></div>
-<div class="cp-cards">@forelse($featured as $p)<a class="cp-card" href="{{route('product',$p->id)}}"><div class="cp-card-img">@if($p->images->count())<img src="{{asset('storage/'.$p->images->first()->path)}}" alt="{{e($p->name)}}">@else<span class="noimg">□</span>@endif</div><h3>{{\Illuminate\Support\Str::limit($p->name,48)}}</h3><span class="vendor">{{$p->vendor?->business_name ?? 'Marketplace Seller'}}</span><span class="price">{{$p->currency}} {{number_format((float)$p->retail_price,2)}}</span><span class="stock">In marketplace • View details</span></a>@empty<p>No featured products yet.</p>@endforelse</div></section>
+<section class="cp-home-section"><div class="cp-home-title"><h2>Featured Products</h2><a href="{{route('shop')}}">See all products</a></div>
+<div class="cp-cards">@forelse($featured as $p)<a class="cp-card" href="{{route('product',$p->id)}}"><div class="cp-card-img">@if($p->images->count())<img src="{{asset('storage/'.$p->images->first()->path)}}" alt="{{e($p->name)}}">@else<span class="noimg">No image</span>@endif</div><h3>{{\Illuminate\Support\Str::limit($p->name,48)}}</h3><span class="vendor">{{$p->vendor?->business_name ?? 'Marketplace Seller'}}</span><span class="price">{{$p->currency}} {{number_format((float)$p->retail_price,2)}}</span><span class="stock">In marketplace • View details</span></a>@empty<p>No featured products yet.</p>@endforelse</div></section>
 
-<section class="cp-home-section"><div class="cp-home-title"><h2>Group Buying Offers</h2><a href="{{route('group-buying')}}">View all offers →</a></div>
+<section class="cp-home-section"><div class="cp-home-title"><h2>Group Buying Offers</h2><a href="{{route('group-buying')}}">View all offers</a></div>
 <div class="cp-offers">@forelse($groupOffers as $o)<a class="cp-offer" href="{{route('product',$o->product_id)}}"><span class="tag">GROUP BUYING</span><h3>{{\Illuminate\Support\Str::limit($o->title,42)}}</h3><strong>{{$o->offer_price}} {{$o->currency}}</strong><small>{{$o->target_participants}} buyers target • Ends {{$o->ends_at}}</small></a>@empty<p>No active group offers right now.</p>@endforelse</div></section>
 
-<section class="cp-home-section"><div class="cp-home-title"><h2>Live Shopping</h2><a href="{{route('live')}}">Watch all live streams →</a></div>
+<section class="cp-home-section"><div class="cp-home-title"><h2>Live Shopping</h2><a href="{{route('live')}}">Watch all live streams</a></div>
 <div class="cp-streams">@forelse($liveStreams as $s)<a class="cp-stream" href="{{route('live')}}"><span class="live-dot">● {{$s->status==='live'?'LIVE NOW':'UPCOMING'}}</span><h3>{{\Illuminate\Support\Str::limit($s->title,48)}}</h3><p>{{$s->business_name}}</p></a>@empty<p>No live streams scheduled right now.</p>@endforelse</div></section>
 
-<section class="cp-home-section"><div class="cp-home-title"><h2>Coupons & Deals</h2><a href="{{route('shop')}}?deals=1">Shop deals →</a></div>
+<section class="cp-home-section"><div class="cp-home-title"><h2>Coupons & Deals</h2><a href="{{route('shop')}}?deals=1">Shop deals</a></div>
 <div class="cp-coupons">@forelse($coupons as $c)<div class="cp-coupon"><strong>{{strtoupper($c->code)}}</strong><span>{{ucfirst($c->type)}} discount • {{$c->value}}</span><small>Use at checkout{{ $c->min_order ? ' • Min order '.$c->min_order : '' }}</small></div>@empty<p>No active coupons right now.</p>@endforelse</div></section>
-<div class="cp-brandline"><img src="{{asset('images/chacha-logo.svg')}}" alt="CHACHA 查查 Prime"></div>
+<div class="cp-home-trust"><div><b>Trusted marketplace experience</b><span>Secure checkout</span><span>Buyer protection</span><span>Multi-country shopping</span><span>Seller verified commerce</span></div></div><div class="cp-brandline"><img src="{{asset('images/chacha-logo.svg')}}" alt="CHACHA 查查 Prime"></div>
 </div></div>
 @endsection
