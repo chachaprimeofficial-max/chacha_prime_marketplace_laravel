@@ -144,6 +144,8 @@ Route::middleware('auth')->prefix('customer')->name('customer.')->group(function
  Route::get('/dashboard',[StorefrontController::class,'customerDashboard'])->name('dashboard');
  Route::get('/orders',[StorefrontController::class,'customerOrders'])->name('orders');
  Route::get('/orders/{id}',[StorefrontController::class,'orderDetail'])->name('order.detail');
+ Route::get('/returns',[StorefrontController::class,'returns'])->name('returns');
+ Route::post('/orders/{orderId}/returns',[StorefrontController::class,'requestReturn'])->name('returns.request');
  Route::get('/wishlist',[StorefrontController::class,'wishlist'])->name('wishlist');
  Route::post('/wishlist/{id}',[StorefrontController::class,'addWishlist'])->name('wishlist.add');
  Route::delete('/wishlist/{id}',[StorefrontController::class,'removeWishlist'])->name('wishlist.remove');
