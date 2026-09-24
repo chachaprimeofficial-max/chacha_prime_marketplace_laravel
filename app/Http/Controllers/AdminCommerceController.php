@@ -11,6 +11,30 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AdminCommerceController extends Controller {
+ public function __construct(){}
+ private function createVendorSettlements(int $orderId): void {
+  $items=DB::table('order_items')->where('order_id',$orderId)->get();
+  $vendorIds=$items->pluck('vendor_id')->filter()->unique();
+  foreach($vendorIds as $vendorId){
+   $vendor=DB::table('vendors')->where('id',$vendorId)->first();
+   if(!$vendor) continue;
+   foreach($items->where('vendor_id',$vendorId) as $item){
+    if(DB::table('vendor_settlements')->where('order_item_id',$item->id)->exists()) continue;
+    $gross=(float)$item->subtotal;
+    $rate=(float)($vendor->commission_rate??0);
+    $commission=round($gross*$rate/100,2);
+    $net=round($gross-$commission,2);
+    $order=DB::table('orders')->where('id',$orderId)->first();
+    DB::table('vendor_settlements')->insert([
+     'vendor_id'=>$vendorId,'order_id'=>$orderId,'order_item_id'=>$item->id,
+     'gross_amount'=>$gross,'commission_amount'=>$commission,'shipping_earnings'=>0,
+     'refund_amount'=>0,'net_amount'=>$net,'currency'=>$item->currency??($order->currency??'USD'),
+     'status'=>'pending','eligible_at'=>now()->addDays(7),'created_at'=>now(),'updated_at'=>now()
+    ]);
+   }
+  }
+ }
+
  public function orders(){
   $orders=Order::with('user')->latest()->paginate(20);
   $couriers=DB::table('users')->join('roles','roles.name','=','users.role')->where('users.role','courier')->where('users.status','active')->select('users.id','users.name')->orderBy('users.name')->get();
