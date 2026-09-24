@@ -31,6 +31,7 @@
 <a href="{{route('admin.module','coupons')}}">◇ <span>Coupons</span></a>
 <div class="nav-title">Finance & System</div>
 <a href="{{route('admin.wallets')}}">▱ <span>Wallets</span></a>
+<a class="{{request()->routeIs('admin.payouts*')?'active':''}}" href="{{route('admin.payouts')}}">⇄ <span>Vendor Payouts</span></a>
 <a href="{{route('admin.cards')}}">▤ <span>Virtual Cards</span></a>
 <a href="{{route('admin.staff')}}">⚙ <span>Staff & Permissions</span></a>
 <a href="{{route('admin.module','currencies')}}">¤ <span>Currencies</span></a>
