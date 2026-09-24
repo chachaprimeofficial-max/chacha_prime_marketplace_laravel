@@ -33,6 +33,7 @@ class AdminCommerceController extends Controller {
     if($shipment) DB::table('shipments')->where('id',$shipment->id)->update($payload);
     else DB::table('shipments')->insert(array_merge(['order_id'=>$locked->id,'vendor_id'=>$item->vendor_id,'shipping_cost'=>0,'created_at'=>now()],$payload));
    }
+   if($data['fulfillment_status']==='delivered') $this->createVendorSettlements($locked->id);
    DB::table('notifications')->insert(['user_id'=>$locked->user_id,'type'=>'order.update','title'=>'Order update: '.$locked->order_number,'message'=>'Your order is now '.$locked->fulfillment_status.'.','data'=>json_encode(['order_id'=>$locked->id]),'created_at'=>now()]);
    if(!empty($data['courier_user_id'])) DB::table('notifications')->insert(['user_id'=>$data['courier_user_id'],'type'=>'shipment.assigned','title'=>'New shipment assigned','message'=>'Order '.$locked->order_number.' has been assigned to you.','data'=>json_encode(['order_id'=>$locked->id]),'created_at'=>now()]);
    app(AuditLogService::class)->log('order.updated','Order',$locked->id,['before'=>$before,'after'=>$data]);
