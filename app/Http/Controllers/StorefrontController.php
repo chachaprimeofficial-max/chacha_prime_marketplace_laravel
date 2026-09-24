@@ -77,6 +77,23 @@ class StorefrontController extends Controller {
   $request->session()->forget('cart');
   return redirect()->route('customer.orders')->with('success','Order(s) placed successfully: #'.implode(', #',$orderIds));
  }
+ public function returns(Request $request){
+  $returns=DB::table('return_requests')->join('orders','orders.id','=','return_requests.order_id')->join('vendors','vendors.id','=','return_requests.vendor_id')->where('return_requests.customer_id',$request->user()->id)->select('return_requests.*','orders.order_number','vendors.business_name')->latest('return_requests.id')->paginate(20);
+  return view('customer.returns',compact('returns'));
+ }
+ public function requestReturn(Request $request,int $orderId){
+  $d=$request->validate(['order_item_id'=>'required|integer','reason'=>'required|string|max:190','details'=>'nullable|string|max:2000']);
+  DB::transaction(function()use($request,$orderId,$d){
+   $order=DB::table('orders')->where('id',$orderId)->where('user_id',$request->user()->id)->lockForUpdate()->first();abort_unless($order,404);
+   abort_unless($order->fulfillment_status==='delivered',422,'A return can be requested after delivery.');
+   $item=DB::table('order_items')->where('id',$d['order_item_id'])->where('order_id',$orderId)->first();abort_unless($item,404);
+   abort_if(DB::table('return_requests')->where('order_item_id',$item->id)->whereIn('status',['requested','approved','received'])->exists(),422,'A return request already exists for this item.');
+   $amount=round((float)$item->unit_price*(float)$item->quantity,2);
+   DB::table('return_requests')->insert(['order_id'=>$orderId,'order_item_id'=>$item->id,'vendor_id'=>$item->vendor_id,'customer_id'=>$request->user()->id,'reason'=>$d['reason'],'details'=>$d['details']??null,'refund_amount'=>$amount,'currency'=>$order->currency,'status'=>'requested','created_at'=>now(),'updated_at'=>now()]);
+  });
+  return back()->with('success','Return request submitted to the seller.');
+ }
+
  public function customerDashboard(Request $request){$user=$request->user();$stats=['orders'=>DB::table('orders')->where('user_id',$user->id)->count(),'pending'=>DB::table('orders')->where('user_id',$user->id)->whereIn('status',['pending','processing'])->count(),'wishlist'=>DB::table('wishlists')->where('user_id',$user->id)->count(),'notifications'=>DB::table('notifications')->where('user_id',$user->id)->whereNull('read_at')->count()];return view('customer.dashboard',compact('user','stats'));}
  public function customerOrders(Request $request){$orders=DB::table('orders')->where('user_id',$request->user()->id)->latest()->paginate(20);return view('customer.orders',compact('orders'));}
  public function invoice(Request $request,int $id){$order=DB::table('orders')->where('id',$id)->where('user_id',$request->user()->id)->firstOrFail();$items=DB::table('order_items')->where('order_id',$id)->get();$identifier=DB::table('product_identifiers')->whereIn('product_id',$items->pluck('product_id'))->get()->keyBy('product_id');return view('customer.invoice',compact('order','items','identifier'));}
