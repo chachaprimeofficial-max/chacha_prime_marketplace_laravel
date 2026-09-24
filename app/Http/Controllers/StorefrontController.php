@@ -85,16 +85,40 @@ class StorefrontController extends Controller {
   return view('customer.returns',compact('returns'));
  }
  public function requestReturn(Request $request,int $orderId){
-  $d=$request->validate(['order_item_id'=>'required|integer','reason'=>'required|string|max:190','details'=>'nullable|string|max:2000']);
-  DB::transaction(function()use($request,$orderId,$d){
+  $d=$request->validate([
+   'order_item_id'=>'required|integer',
+   'reason'=>'required|string|max:190',
+   'details'=>'nullable|string|max:2000',
+   'evidence_images'=>'required|array|min:1|max:8',
+   'evidence_images.*'=>'image|mimes:jpg,jpeg,png,webp|max:10240',
+   'evidence_videos'=>'required|array|min:1|max:4',
+   'evidence_videos.*'=>'file|mimes:mp4,webm,mov|max:102400',
+  ]);
+  $imageFiles=$request->file('evidence_images',[]);
+  $videoFiles=$request->file('evidence_videos',[]);
+  abort_unless(count($imageFiles)>=1 && count($videoFiles)>=1,422,'At least one photo and one video are required for a return request.');
+  DB::transaction(function()use($request,$orderId,$d,$imageFiles,$videoFiles){
    $order=DB::table('orders')->where('id',$orderId)->where('user_id',$request->user()->id)->lockForUpdate()->first();abort_unless($order,404);
    abort_unless($order->fulfillment_status==='delivered',422,'A return can be requested after delivery.');
+   $shipment=DB::table('shipments')->where('order_id',$orderId)->where('status','delivered')->whereNotNull('delivered_at')->orderByDesc('delivered_at')->first();
+   abort_unless($shipment,422,'The delivery date could not be verified.');
+   $deliveredAt=\Illuminate\Support\Carbon::parse($shipment->delivered_at);
+   $deadline=$deliveredAt->copy()->addDays(7);
+   abort_if(now()->gt($deadline),422,'The 7-day return period has expired. Returns are not accepted after the deadline.');
    $item=DB::table('order_items')->where('id',$d['order_item_id'])->where('order_id',$orderId)->first();abort_unless($item,404);
    abort_if(DB::table('return_requests')->where('order_item_id',$item->id)->whereIn('status',['requested','approved','received'])->exists(),422,'A return request already exists for this item.');
+   $images=[];$videos=[];
+   foreach($imageFiles as $file){$images[]=$file->store('returns/evidence/images','public');}
+   foreach($videoFiles as $file){$videos[]=$file->store('returns/evidence/videos','public');}
    $amount=round((float)$item->unit_price*(float)$item->quantity,2);
-   DB::table('return_requests')->insert(['order_id'=>$orderId,'order_item_id'=>$item->id,'vendor_id'=>$item->vendor_id,'customer_id'=>$request->user()->id,'reason'=>$d['reason'],'details'=>$d['details']??null,'refund_amount'=>$amount,'currency'=>$order->currency,'status'=>'requested','created_at'=>now(),'updated_at'=>now()]);
+   DB::table('return_requests')->insert([
+    'order_id'=>$orderId,'order_item_id'=>$item->id,'vendor_id'=>$item->vendor_id,'customer_id'=>$request->user()->id,
+    'reason'=>$d['reason'],'details'=>$d['details']??null,'evidence_images'=>json_encode($images),'evidence_videos'=>json_encode($videos),
+    'delivered_at'=>$deliveredAt,'return_deadline_at'=>$deadline,'refund_amount'=>$amount,'currency'=>$order->currency,'status'=>'requested',
+    'created_at'=>now(),'updated_at'=>now()
+   ]);
   });
-  return back()->with('success','Return request submitted to the seller.');
+  return back()->with('success','Return request submitted with photo and video evidence. The seller can now review it.');
  }
 
  public function customerDashboard(Request $request){$user=$request->user();$stats=['orders'=>DB::table('orders')->where('user_id',$user->id)->count(),'pending'=>DB::table('orders')->where('user_id',$user->id)->whereIn('status',['pending','processing'])->count(),'wishlist'=>DB::table('wishlists')->where('user_id',$user->id)->count(),'notifications'=>DB::table('notifications')->where('user_id',$user->id)->whereNull('read_at')->count()];return view('customer.dashboard',compact('user','stats'));}
