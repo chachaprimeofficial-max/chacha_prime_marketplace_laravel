@@ -26,59 +26,57 @@ class StorefrontController extends Controller {
  public function placeOrder(Request $request){
   $data=$request->validate(['payment_method_id'=>'required|integer','address_id'=>'required|exists:addresses,id','coupon_code'=>'nullable|string|max:80']);
   $cart=$request->session()->get('cart',[]);
-  $products=Product::where('status','published')->whereIn('id',array_keys($cart))->get()->keyBy('id');
-  abort_if($products->isEmpty(),422,'Cart is empty.');
+  abort_if(empty($cart),422,'Cart is empty.');
   $address=DB::table('addresses')->where('id',$data['address_id'])->where('user_id',$request->user()->id)->first();
-  abort_unless($address,403);
+  abort_unless($address,403,'Selected address is not available.');
   abort_unless(DB::table('payment_methods')->where('id',$data['payment_method_id'])->where('enabled',1)->exists(),422,'Selected payment method is unavailable.');
   $customerType=$request->user()->role==='b2b_customer'?'b2b':'b2c';
   $pricing=app(PricingService::class);
-  $coupon=null;
-  if(!empty($data['coupon_code'])){
-   $coupon=DB::table('coupons')->where('code',strtoupper(trim($data['coupon_code'])))->where('status',1)
-    ->where(fn($q)=>$q->whereNull('starts_at')->orWhere('starts_at','<=',now()))
-    ->where(fn($q)=>$q->whereNull('ends_at')->orWhere('ends_at','>=',now()))
-    ->where(fn($q)=>$q->whereNull('usage_limit')->orWhereColumn('used_count','<','usage_limit'))->first();
-   abort_unless($coupon,422,'Invalid, expired, or exhausted coupon.');
-  }
-  $orderIds=DB::transaction(function()use($products,$cart,$address,$data,$request,$pricing,$customerType,$coupon){
-   $ids=[];$appliedCoupon=false;$vendorGroups=$products->groupBy('vendor_id');
-   $groupSubtotals=[];
-   foreach($vendorGroups as $vendorId=>$items){
-    $subtotal=0;
-    foreach($items as $p){$qty=(int)$cart[$p->id];abort_if((float)$p->stock<$qty||$p->stock_status==='out_of_stock',422,'Stock changed. Please review your cart.');$subtotal+=$pricing->unitPrice($p,$qty,$customerType)*$qty;}
-    $groupSubtotals[(int)$vendorId]=$subtotal;
+  $couponCode=trim((string)($data['coupon_code']??''));
+  $orderIds=DB::transaction(function()use($cart,$address,$data,$request,$pricing,$customerType,$couponCode){
+   $productIds=array_map('intval',array_keys($cart));
+   $products=Product::where('status','published')->whereIn('id',$productIds)->lockForUpdate()->get()->keyBy('id');
+   abort_if($products->count()!==count($productIds),422,'One or more cart items are no longer available.');
+   $currencies=$products->pluck('currency')->map(fn($v)=>strtoupper((string)$v))->unique()->values();
+   abort_if($currencies->count()>1,422,'Your cart contains multiple currencies. Please checkout items with the same currency separately.');
+   $currency=$currencies->first() ?: 'USD';
+   $coupon=null;
+   if($couponCode!==''){
+    $coupon=DB::table('coupons')->where('code',strtoupper($couponCode))->where('status',1)->lockForUpdate()->first();
+    abort_unless($coupon,422,'Invalid coupon.');
+    abort_if($coupon->starts_at && now()->lt($coupon->starts_at),422,'Coupon is not active yet.');
+    abort_if($coupon->ends_at && now()->gt($coupon->ends_at),422,'Coupon has expired.');
+    abort_if($coupon->usage_limit!==null && $coupon->used_count >= $coupon->usage_limit,422,'Coupon usage limit has been reached.');
+    abort_if($coupon->vendor_id && !$products->contains(fn($p)=>(int)$p->vendor_id===(int)$coupon->vendor_id),422,'This coupon does not apply to your cart.');
    }
-   $totalCartSubtotal=array_sum($groupSubtotals);
-   $globalDiscount=0;$globalRemaining=0;
-   if($coupon && is_null($coupon->vendor_id) && ($coupon->min_order===null || $totalCartSubtotal >= (float)$coupon->min_order)){
-    $globalDiscount=$coupon->type==='percent' ? $totalCartSubtotal*((float)$coupon->value/100) : (float)$coupon->value;
+   $vendorGroups=$products->groupBy('vendor_id'); $ids=[]; $couponUsed=false; $cartSubtotal=0;
+   foreach($vendorGroups as $items){
+    foreach($items as $p){$qty=max(1,(int)$cart[$p->id]);abort_if($p->stock_status==='out_of_stock'||(float)$p->stock<$qty,422,'Stock changed. Please review your cart.');$cartSubtotal+=round($pricing->unitPrice($p,$qty,$customerType)*$qty,2);}
+   }
+   $globalDiscount=0;
+   if($coupon && !$coupon->vendor_id && (!$coupon->min_order || $cartSubtotal >= (float)$coupon->min_order)){
+    $globalDiscount=$coupon->type==='percent' ? $cartSubtotal*((float)$coupon->value/100) : (float)$coupon->value;
     if($coupon->max_discount!==null)$globalDiscount=min($globalDiscount,(float)$coupon->max_discount);
-    $globalDiscount=min($globalDiscount,$totalCartSubtotal);$globalRemaining=$globalDiscount;
+    $globalDiscount=min($globalDiscount,$cartSubtotal);
    }
    foreach($vendorGroups as $vendorId=>$items){
-    $subtotal=$groupSubtotals[(int)$vendorId];$discount=0;
-    if($coupon && is_null($coupon->vendor_id) && $globalDiscount>0){
-     $discount=$totalCartSubtotal>0 ? $globalDiscount*($subtotal/$totalCartSubtotal) : 0;
-     $globalRemaining=max(0,$globalRemaining-$discount);
-    }elseif($coupon && (int)$coupon->vendor_id===(int)$vendorId && ($coupon->min_order===null || $subtotal >= (float)$coupon->min_order)){
-     $discount=$coupon->type==='percent' ? $subtotal*((float)$coupon->value/100) : (float)$coupon->value;
-     if($coupon->max_discount!==null)$discount=min($discount,(float)$coupon->max_discount);
-     $discount=min($discount,$subtotal);
-    }
-    $discount=round($discount,2);
-    if($discount>0)$appliedCoupon=true;
-    $order=new Order;$order->user_id=$request->user()->id;$order->order_number='CP-'.strtoupper(bin2hex(random_bytes(5)));$order->status='pending';$order->payment_status='pending';$order->fulfillment_status='unfulfilled';$order->currency='USD';$order->subtotal=$subtotal;$order->discount_total=$discount;$order->grand_total=max(0,$subtotal-$discount);$order->shipping_address=(array)$address;$order->billing_address=(array)$address;$order->save();
-    foreach($items as $p){$qty=(int)$cart[$p->id];$unit=$pricing->unitPrice($p,$qty,$customerType);DB::table('order_items')->insert(['order_id'=>$order->id,'vendor_id'=>$p->vendor_id,'product_id'=>$p->id,'product_name'=>$p->name,'sku'=>$p->sku,'quantity'=>$qty,'unit_price'=>$unit,'subtotal'=>$unit*$qty]);DB::table('products')->where('id',$p->id)->decrement('stock',$qty);DB::table('products')->where('id',$p->id)->update(['stock_status'=>DB::raw("CASE WHEN stock <= 0 THEN 'out_of_stock' ELSE 'in_stock' END")]);}
+    $subtotal=0; foreach($items as $p){$qty=max(1,(int)$cart[$p->id]);$subtotal+=round($pricing->unitPrice($p,$qty,$customerType)*$qty,2);}
+    $discount=0;
+    if($coupon && !$coupon->vendor_id && $globalDiscount>0)$discount=round($globalDiscount*($subtotal/max($cartSubtotal,1)),2);
+    elseif($coupon && (int)$coupon->vendor_id===(int)$vendorId && (!$coupon->min_order || $subtotal >= (float)$coupon->min_order)){$discount=$coupon->type==='percent'?$subtotal*((float)$coupon->value/100):(float)$coupon->value;if($coupon->max_discount!==null)$discount=min($discount,(float)$coupon->max_discount);$discount=min($discount,$subtotal);}
+    $discount=round(min($discount,$subtotal),2);
+    $order=new Order;
+    $order->user_id=$request->user()->id;$order->order_number='CP-'.strtoupper(bin2hex(random_bytes(5)));$order->status='pending';$order->payment_status='pending';$order->fulfillment_status='unfulfilled';$order->currency=$currency;$order->subtotal=round($subtotal,2);$order->discount_total=$discount;$order->shipping_total=0;$order->tax_total=0;$order->grand_total=round(max(0,$subtotal-$discount),2);$order->shipping_address=(array)$address;$order->billing_address=(array)$address;$order->save();
+    foreach($items as $p){$qty=max(1,(int)$cart[$p->id]);$unit=round($pricing->unitPrice($p,$qty,$customerType),2);DB::table('order_items')->insert(['order_id'=>$order->id,'vendor_id'=>$p->vendor_id,'product_id'=>$p->id,'product_name'=>$p->name,'sku'=>$p->sku,'quantity'=>$qty,'unit_price'=>$unit,'subtotal'=>round($unit*$qty,2),'vendor_status'=>'pending']);$newStock=(float)$p->stock-$qty;DB::table('products')->where('id',$p->id)->update(['stock'=>$newStock,'stock_status'=>$newStock<=0?'out_of_stock':'in_stock']);}
     app(PaymentService::class)->createPayment($order,(int)$data['payment_method_id']);$ids[]=$order->id;
+    if($discount>0)$couponUsed=true;
    }
-   if($coupon && $appliedCoupon)DB::table('coupons')->where('id',$coupon->id)->increment('used_count');
+   if($coupon && $couponUsed)DB::table('coupons')->where('id',$coupon->id)->increment('used_count');
    return $ids;
   });
   $request->session()->forget('cart');
   return redirect()->route('customer.orders')->with('success','Order(s) placed successfully: #'.implode(', #',$orderIds));
  }
-
  public function customerDashboard(Request $request){$user=$request->user();$stats=['orders'=>DB::table('orders')->where('user_id',$user->id)->count(),'pending'=>DB::table('orders')->where('user_id',$user->id)->whereIn('status',['pending','processing'])->count(),'wishlist'=>DB::table('wishlists')->where('user_id',$user->id)->count(),'notifications'=>DB::table('notifications')->where('user_id',$user->id)->whereNull('read_at')->count()];return view('customer.dashboard',compact('user','stats'));}
  public function customerOrders(Request $request){$orders=DB::table('orders')->where('user_id',$request->user()->id)->latest()->paginate(20);return view('customer.orders',compact('orders'));}
  public function invoice(Request $request,int $id){$order=DB::table('orders')->where('id',$id)->where('user_id',$request->user()->id)->firstOrFail();$items=DB::table('order_items')->where('order_id',$id)->get();$identifier=DB::table('product_identifiers')->whereIn('product_id',$items->pluck('product_id'))->get()->keyBy('product_id');return view('customer.invoice',compact('order','items','identifier'));}
