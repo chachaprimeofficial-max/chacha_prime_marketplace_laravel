@@ -3,10 +3,10 @@
 <div class="cp-topbar"><div class="cp-top-inner">
 <button class="cp-icon-btn cp-mobile-menu-btn" type="button" data-cp-open-drawer aria-label="Open categories"><span class="cp-hamburger-icon" aria-hidden="true"></span></button>
 <a class="cp-logo" href="{{route('home')}}"><img src="{{asset('images/chacha-logo.svg')}}" alt="CHACHA 查查 Prime"></a>
-<a class="cp-deliver" href="#"><span class="cp-pin-icon" aria-hidden="true"></span><span><small>Deliver to</small><strong>Pakistan</strong></span></a>
+<a class="cp-deliver" href="{{route("marketplace.country.selector")}}"><span class="cp-pin-icon" aria-hidden="true"></span><span><small>Deliver to</small><strong>{{$marketplaceCountry?->flag}} {{$marketplaceCountry?->name ?? "Choose country"}}</strong></span></a>
 @include('partials.search-bar')
 <div class="cp-header-actions">
-<button class="cp-lang" type="button"><span class="cp-globe-icon" aria-hidden="true"></span> EN <span class="cp-chevron">⌄</span></button>
+<a class="cp-lang" href="{{route("marketplace.country.selector")}}" style="text-decoration:none"><span class="cp-globe-icon" aria-hidden="true"></span> {{$marketplaceCountry?->currency_code ?? "USD"}} <span class="cp-chevron">⌄</span></a>
 <div class="cp-account-wrap"><button class="cp-account" type="button" data-cp-account><small>Hello, {{$user?->name ? \Illuminate\Support\Str::limit($user->name,16) : 'sign in'}}</small><strong>Account &amp; Lists <span class="cp-chevron">⌄</span></strong></button>@include('partials.account-dropdown')</div>
 <a class="cp-returns" href="{{$user?route('customer.orders'):route('auth.login')}}"><small>Returns</small><strong>&amp; Orders</strong></a>
 <div class="cp-cart-wrap"><a class="cp-cart" href="{{route('cart')}}" data-cp-cart><span class="cp-cart-icon" aria-hidden="true"></span><b>{{$cartCount}}</b><strong>Cart</strong></a><div class="cp-mini-cart" data-cp-cart-menu><div class="cp-mini-cart-head">Cart <b>{{$cartCount}} item{{ $cartCount===1 ? "" : "s" }}</b></div>@if($cartCount)<div class="cp-mini-cart-items">@foreach(session("cart",[]) as $pid=>$qty)<div class="cp-mini-cart-row"><span>Product #{{$pid}}</span><b>×{{$qty}}</b></div>@endforeach</div><a class="cp-mini-cart-btn" href="{{route("cart")}}">View cart &amp; checkout</a>@else<div class="cp-mini-cart-empty">Your cart is empty.</div><a class="cp-mini-cart-btn" href="{{route("shop")}}">Start shopping</a>@endif</div></div>
