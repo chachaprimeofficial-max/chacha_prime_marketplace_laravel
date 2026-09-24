@@ -37,7 +37,8 @@ class StorefrontController extends Controller {
   $couponCode=trim((string)($data['coupon_code']??''));
   $orderIds=DB::transaction(function()use($cart,$address,$data,$request,$pricing,$customerType,$couponCode){
    $productIds=array_map('intval',array_keys($cart));
-   $products=Product::where('status','published')->whereIn('id',$productIds)->lockForUpdate()->get()->keyBy('id');
+   $countryId=(int)($request->session()->get('marketplace_country_id') ?: DB::table('countries')->where('code','PK')->value('id'));
+   $products=Product::where('status','published')->whereIn('id',$productIds)->where(fn($q)=>$q->where('country_id',$countryId)->orWhereHas('marketplaces',fn($m)=>$m->where('countries.id',$countryId)->where('product_marketplaces.active',1)))->lockForUpdate()->get()->keyBy('id');
    abort_if($products->count()!==count($productIds),422,'One or more cart items are no longer available.');
    $currencies=$products->pluck('currency')->map(fn($v)=>strtoupper((string)$v))->unique()->values();
    abort_if($currencies->count()>1,422,'Your cart contains multiple currencies. Please checkout items with the same currency separately.');
@@ -68,7 +69,7 @@ class StorefrontController extends Controller {
     elseif($coupon && (int)$coupon->vendor_id===(int)$vendorId && (!$coupon->min_order || $subtotal >= (float)$coupon->min_order)){$discount=$coupon->type==='percent'?$subtotal*((float)$coupon->value/100):(float)$coupon->value;if($coupon->max_discount!==null)$discount=min($discount,(float)$coupon->max_discount);$discount=min($discount,$subtotal);}
     $discount=round(min($discount,$subtotal),2);
     $order=new Order;
-    $order->user_id=$request->user()->id;$order->order_number='CP-'.strtoupper(bin2hex(random_bytes(5)));$order->status='pending';$order->payment_status='pending';$order->fulfillment_status='unfulfilled';$order->currency=$currency;$order->subtotal=round($subtotal,2);$order->discount_total=$discount;$order->shipping_total=0;$order->tax_total=0;$order->grand_total=round(max(0,$subtotal-$discount),2);$order->shipping_address=(array)$address;$order->billing_address=(array)$address;$order->save();
+    $order->user_id=$request->user()->id;$order->country_id=$countryId;$order->order_number='CP-'.strtoupper(bin2hex(random_bytes(5)));$order->status='pending';$order->payment_status='pending';$order->fulfillment_status='unfulfilled';$order->currency=$currency;$order->subtotal=round($subtotal,2);$order->discount_total=$discount;$order->shipping_total=0;$order->tax_total=0;$order->grand_total=round(max(0,$subtotal-$discount),2);$order->shipping_address=(array)$address;$order->billing_address=(array)$address;$order->save();
     foreach($items as $p){$qty=max(1,(int)$cart[$p->id]);$unit=round($pricing->unitPrice($p,$qty,$customerType),2);DB::table('order_items')->insert(['order_id'=>$order->id,'vendor_id'=>$p->vendor_id,'product_id'=>$p->id,'product_name'=>$p->name,'sku'=>$p->sku,'quantity'=>$qty,'unit_price'=>$unit,'subtotal'=>round($unit*$qty,2),'vendor_status'=>'pending']);$newStock=(float)$p->stock-$qty;DB::table('products')->where('id',$p->id)->update(['stock'=>$newStock,'stock_status'=>$newStock<=0?'out_of_stock':'in_stock']);}
     app(PaymentService::class)->createPayment($order,(int)$data['payment_method_id']);$ids[]=$order->id;
     if($discount>0)$couponUsed=true;
