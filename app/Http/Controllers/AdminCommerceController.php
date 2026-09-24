@@ -11,8 +11,34 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AdminCommerceController extends Controller {
- public function orders(){return view('admin.orders',['orders'=>Order::with('user')->latest()->paginate(20)]);}
- public function updateOrder(Request $request,Order $order){$data=$request->validate(['status'=>'required|in:pending,processing,completed,cancelled,refunded','payment_status'=>'required|in:pending,unpaid,paid,failed,refunded','fulfillment_status'=>'required|in:unfulfilled,processing,shipped,delivered']);$before=$order->only(['status','payment_status','fulfillment_status']);$order->update($data);app(AuditLogService::class)->log('order.updated','Order',$order->id,['before'=>$before,'after'=>$data]);return back()->with('success','Order updated.');}
+ public function orders(){
+  $orders=Order::with('user')->latest()->paginate(20);
+  $couriers=DB::table('users')->join('roles','roles.name','=','users.role')->where('users.role','courier')->where('users.status','active')->select('users.id','users.name')->orderBy('users.name')->get();
+  return view('admin.orders',compact('orders','couriers'));
+ }
+ public function updateOrder(Request $request,Order $order){
+  $data=$request->validate(['status'=>'required|in:pending,processing,completed,cancelled,refunded','payment_status'=>'required|in:pending,unpaid,paid,failed,refunded','fulfillment_status'=>'required|in:unfulfilled,processing,shipped,delivered','courier_user_id'=>'nullable|integer|exists:users,id','tracking_number'=>'nullable|string|max:150']);
+  if(!empty($data['courier_user_id'])) abort_unless(DB::table('users')->where('id',$data['courier_user_id'])->where('role','courier')->where('status','active')->exists(),422,'Selected courier is not active.');
+  DB::transaction(function()use($request,$order,$data){
+   $locked=Order::whereKey($order->id)->lockForUpdate()->first();$before=$locked->only(['status','payment_status','fulfillment_status']);$locked->update(collect($data)->except(['courier_user_id','tracking_number'])->all());
+   $items=DB::table('order_items')->where('order_id',$locked->id)->get();
+   foreach($items as $item){
+    $method=DB::table('shipping_methods')->where('enabled',1)->orderByRaw("CASE WHEN code='manual' THEN 0 ELSE 1 END")->first();
+    if(!$method) continue;
+    $shipment=DB::table('shipments')->where('order_id',$locked->id)->where('vendor_id',$item->vendor_id)->lockForUpdate()->first();
+    $status=$data['fulfillment_status']==='delivered'?'delivered':($data['fulfillment_status']==='shipped'?'shipped':'processing');
+    $payload=['shipping_method_id'=>$method->id,'courier_user_id'=>$data['courier_user_id']??null,'tracking_number'=>$data['tracking_number']??($shipment->tracking_number??null),'status'=>$status,'updated_at'=>now()];
+    if($status==='shipped' && !$shipment?->shipped_at)$payload['shipped_at']=now();
+    if($status==='delivered'){$payload['shipped_at']=$shipment?->shipped_at ?: now();$payload['delivered_at']=now();}
+    if($shipment) DB::table('shipments')->where('id',$shipment->id)->update($payload);
+    else DB::table('shipments')->insert(array_merge(['order_id'=>$locked->id,'vendor_id'=>$item->vendor_id,'shipping_cost'=>0,'created_at'=>now()],$payload));
+   }
+   DB::table('notifications')->insert(['user_id'=>$locked->user_id,'type'=>'order.update','title'=>'Order update: '.$locked->order_number,'message'=>'Your order is now '.$locked->fulfillment_status.'.','data'=>json_encode(['order_id'=>$locked->id]),'created_at'=>now()]);
+   if(!empty($data['courier_user_id'])) DB::table('notifications')->insert(['user_id'=>$data['courier_user_id'],'type'=>'shipment.assigned','title'=>'New shipment assigned','message'=>'Order '.$locked->order_number.' has been assigned to you.','data'=>json_encode(['order_id'=>$locked->id]),'created_at'=>now()]);
+   app(AuditLogService::class)->log('order.updated','Order',$locked->id,['before'=>$before,'after'=>$data]);
+  });
+  return back()->with('success','Order, shipment and notifications updated.');
+ }
  public function payments(){return view('admin.payments',['payments'=>Payment::with(['user','order'])->latest()->paginate(20)]);}
  public function updatePayment(Request $request,Payment $payment){$data=$request->validate(['status'=>'required|in:pending,paid,failed,refunded']);$before=$payment->only(['status','paid_at']);$payment->update($data);if($data['status']==='paid'){$payment->paid_at=now();$payment->save();$payment->order()->update(['payment_status'=>'paid']);}elseif($data['status']==='refunded'){$payment->order()->update(['payment_status'=>'refunded']);}app(AuditLogService::class)->log('payment.updated','Payment',$payment->id,['before'=>$before,'after'=>$data]);return back()->with('success','Payment updated.');}
  public function wallets(){return view('admin.wallets',['wallets'=>Wallet::with('user')->latest()->paginate(20)]);}
