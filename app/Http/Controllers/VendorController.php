@@ -170,7 +170,51 @@ class VendorController extends Controller
    'delivered'=>(clone $base)->where('orders.fulfillment_status','delivered')->distinct('orders.id')->count('orders.id'),
   ],'q'=>$q,'status'=>$status,'payment'=>$payment,'fulfillment'=>$fulfillment]);
  }
- public function updateOrder(Request $request,int $id){$vendor=$this->vendor($request);$d=$request->validate(['status'=>'required|in:pending,processing,cancelled','fulfillment_status'=>'required|in:unfulfilled,processing,shipped,delivered']);$owns=DB::table('order_items')->where('vendor_id',$vendor->id)->where('order_id',$id)->exists();abort_unless($owns,404);DB::table('orders')->where('id',$id)->update(['status'=>$d['status'],'fulfillment_status'=>$d['fulfillment_status'],'updated_at'=>now()]);return back()->with('success','Order updated.');}
+ public function updateOrder(Request $request,int $id){
+  $vendor=$this->vendor($request);
+  $d=$request->validate(['status'=>'required|in:pending,processing,cancelled','fulfillment_status'=>'required|in:unfulfilled,processing,shipped,delivered','tracking_number'=>'nullable|string|max:150']);
+  $owns=DB::table('order_items')->where('vendor_id',$vendor->id)->where('order_id',$id)->exists();abort_unless($owns,404);
+  DB::transaction(function()use($vendor,$id,$d){
+   $order=DB::table('orders')->where('id',$id)->lockForUpdate()->first();abort_unless($order,404);
+   if($d['status']==='cancelled' && $order->payment_status==='paid') abort(422,'Paid orders require the refund workflow before cancellation.');
+   DB::table('orders')->where('id',$id)->update(['status'=>$d['status'],'fulfillment_status'=>$d['fulfillment_status'],'updated_at'=>now()]);
+   if(in_array($d['fulfillment_status'],['shipped','delivered'],true)){
+    $method=DB::table('shipping_methods')->where('enabled',1)->orderByRaw("CASE WHEN code='manual' THEN 0 ELSE 1 END")->first();abort_unless($method,422,'No enabled shipping method is available.');
+    $shipment=DB::table('shipments')->where('order_id',$id)->where('vendor_id',$vendor->id)->lockForUpdate()->first();
+    $status=$d['fulfillment_status']==='delivered'?'delivered':'shipped';
+    $tracking=$d['tracking_number']??($shipment->tracking_number??null);
+    if($shipment) DB::table('shipments')->where('id',$shipment->id)->update(['shipping_method_id'=>$method->id,'tracking_number'=>$tracking,'status'=>$status,'shipped_at'=>$shipment->shipped_at ?: ($status==='shipped'?now():null),'delivered_at'=>$status==='delivered'?now():$shipment->delivered_at,'updated_at'=>now()]);
+    else DB::table('shipments')->insert(['order_id'=>$id,'vendor_id'=>$vendor->id,'shipping_method_id'=>$method->id,'tracking_number'=>$tracking,'status'=>$status,'shipping_cost'=>0,'shipped_at'=>$status==='shipped'?now():now(),'delivered_at'=>$status==='delivered'?now():null,'created_at'=>now(),'updated_at'=>now()]);
+   }
+  });
+  return back()->with('success','Order and shipment status updated.');
+ }
+ public function returns(Request $request){
+  $vendor=$this->vendor($request);
+  $returns=DB::table('return_requests')->join('orders','orders.id','=','return_requests.order_id')->join('users','users.id','=','return_requests.customer_id')->where('return_requests.vendor_id',$vendor->id)->select('return_requests.*','orders.order_number','users.name as customer_name')->latest('return_requests.id')->paginate(20);
+  return view('vendor.returns',compact('vendor','returns'));
+ }
+ public function updateReturn(Request $request,int $id){
+  $vendor=$this->vendor($request);
+  $d=$request->validate(['status'=>'required|in:approved,rejected,received,refunded,cancelled','resolution_note'=>'nullable|string|max:1000']);
+  DB::transaction(function()use($vendor,$id,$d){
+   $r=DB::table('return_requests')->where('id',$id)->where('vendor_id',$vendor->id)->lockForUpdate()->first();abort_unless($r,404);
+   abort_if(in_array($r->status,['refunded','rejected','cancelled'],true)&&$d['status']!==$r->status,422,'This return is already finalized.');
+   if($d['status']==='refunded'){
+    abort_unless(in_array($r->status,['approved','received'],true),422,'Return must be approved or received before refund.');
+    abort_if((float)$r->refund_amount<=0,422,'Refund amount is not available.');
+    $wallet=DB::table('wallets')->where('user_id',$r->customer_id)->lockForUpdate()->first();abort_unless($wallet,422,'Customer wallet is not available.');
+    abort_unless(strtoupper($wallet->currency)===strtoupper($r->currency),422,'Customer wallet currency does not match the refund currency.');
+    $already=DB::table('wallet_transactions')->where('reference_type','return_refund')->where('reference_id',$id)->exists();
+    if(!$already){$new=(float)$wallet->balance+(float)$r->refund_amount;DB::table('wallets')->where('id',$wallet->id)->update(['balance'=>$new,'updated_at'=>now()]);DB::table('wallet_transactions')->insert(['wallet_id'=>$wallet->id,'type'=>'credit','amount'=>$r->refund_amount,'balance_after'=>$new,'reference_type'=>'return_refund','reference_id'=>$id,'description'=>'Customer refund for returned order item','created_at'=>now()]);}
+    DB::table('payments')->where('order_id',$r->order_id)->where('status','paid')->update(['status'=>'refunded','updated_at'=>now()]);
+    DB::table('orders')->where('id',$r->order_id)->update(['payment_status'=>'refunded','updated_at'=>now()]);
+   }
+   DB::table('return_requests')->where('id',$id)->update(['status'=>$d['status'],'resolution_note'=>$d['resolution_note']??$r->resolution_note,'processed_at'=>in_array($d['status'],['refunded','rejected','cancelled'],true)?now():$r->processed_at,'updated_at'=>now()]);
+  });
+  return back()->with('success','Return request updated.');
+ }
+
  public function wallet(Request $request){$vendor=$this->vendor($request);$wallet=DB::table('wallets')->where('user_id',$request->user()->id)->first();return view('vendor.wallet',compact('vendor','wallet'));}
  public function reviews(Request $request){$vendor=$this->vendor($request);$productIds=Product::where('vendor_id',$vendor->id)->pluck('id');return view('vendor.reviews',['vendor'=>$vendor,'reviews'=>DB::table('reviews')->whereIn('product_id',$productIds)->latest()->paginate(20)]);}
 }
