@@ -48,6 +48,7 @@ Route::prefix('auth')->name('auth.')->group(function(){
 Route::get('/vendor/register',fn()=>redirect()->route('auth.register',['type'=>'vendor']))->name('vendor.register');
 Route::middleware(['auth','role:affiliate'])->prefix('affiliate')->name('affiliate.')->group(function(){Route::get('/dashboard',[RoleDashboardController::class,'affiliate'])->name('dashboard');});
 Route::middleware(['auth','role:courier'])->prefix('courier')->name('courier.')->group(function(){Route::get('/dashboard',[RoleDashboardController::class,'courier'])->name('dashboard');
+ Route::post('/shipments/{id}',[RoleDashboardController::class,'updateShipment'])->name('shipments.update');
  Route::post('/shipments/{id}',[RoleDashboardController::class,'updateShipment'])->name('shipments.update');});
 Route::middleware(['auth','role:streamer'])->prefix('streamer')->name('streamer.')->group(function(){Route::get('/dashboard',[RoleDashboardController::class,'streamer'])->name('dashboard');});
 Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->group(function(){
