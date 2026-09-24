@@ -25,14 +25,16 @@
 <a class="{{request()->routeIs('admin.returns*')?'active':''}}" href="{{route('admin.returns')}}"><i class="admin-nav-icon admin-i-return" aria-hidden="true"></i> <span>Returns & Refunds</span></a>
 <a class="{{request()->routeIs('admin.payments')?'active':''}}" href="{{route('admin.payments')}}"><i class="admin-nav-icon admin-i-payment" aria-hidden="true"></i> <span>Payments</span></a>
 <div class="nav-title">Marketplace</div>
+<a class="{{request()->routeIs('admin.marketplaces*')?'active':''}}" href="{{route('admin.marketplaces')}}"><i class="admin-nav-icon admin-i-grid" aria-hidden="true"></i> <span>Marketplace Control</span></a>
 <a href="{{route('admin.module','group-buying')}}"><i class="admin-nav-icon admin-i-group" aria-hidden="true"></i> <span>Group Buying</span></a>
 <a href="{{route('admin.module','live-commerce')}}"><i class="admin-nav-icon admin-i-play" aria-hidden="true"></i> <span>Live Commerce</span></a>
 <a href="{{route('admin.module','shipping')}}">⌁ <span>Shipping</span></a>
 <a href="{{route('admin.module','brands')}}">◆ <span>Brands</span></a>
 <a href="{{route('admin.module','coupons')}}"><i class="admin-nav-icon admin-i-payment" aria-hidden="true"></i> <span>Coupons</span></a>
 <div class="nav-title">Finance & System</div>
+<a class="{{request()->routeIs('admin.finance*')?'active':''}}" href="{{route('admin.finance')}}"><i class="admin-nav-icon admin-i-payout" aria-hidden="true"></i> <span>Finance & Settlements</span></a>
 <a href="{{route('admin.wallets')}}"><i class="admin-nav-icon admin-i-wallet" aria-hidden="true"></i> <span>Wallets</span></a>
-<a class="{{request()->routeIs('admin.payouts*')?'active':''}}" href="{{route('admin.payouts')}}">⇄ <span>Vendor Payouts</span></a>
+<a class="{{request()->routeIs('admin.payouts*')?'active':''}}" href="{{route('admin.payouts')}}"><i class="admin-nav-icon admin-i-payout" aria-hidden="true"></i> <span>Vendor Payouts</span></a>
 <a href="{{route('admin.cards')}}"><i class="admin-nav-icon admin-i-order" aria-hidden="true"></i> <span>Virtual Cards</span></a>
 <a href="{{route('admin.staff')}}"><i class="admin-nav-icon admin-i-settings" aria-hidden="true"></i> <span>Staff & Permissions</span></a>
 <a href="{{route('admin.module','currencies')}}">¤ <span>Currencies</span></a>
