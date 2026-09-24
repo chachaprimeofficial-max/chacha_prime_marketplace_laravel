@@ -83,6 +83,9 @@
         <div class="cp-seller-stat"><span class="label">Paid Sales</span><strong>{{number_format((float)$stats['sales'],2)}}</strong><small>Marketplace sales value</small></div>
         <div class="cp-seller-stat"><span class="label">Orders</span><strong>{{number_format($stats['orders'])}}</strong><small>Orders containing your items</small></div>
         <div class="cp-seller-stat"><span class="label">Low Stock</span><strong>{{number_format($stats['low_stock'])}}</strong><small>10 units or less</small></div>
+        <div class="cp-seller-stat"><span class="label">Marketplace Reach</span><strong>{{number_format($stats['marketplace_listings'])}}</strong><small>Active country listings</small></div>
+        <div class="cp-seller-stat"><span class="label">Open Returns</span><strong>{{number_format($stats['pending_returns'])}}</strong><small>Returns needing attention</small></div>
+        <div class="cp-seller-stat"><span class="label">Messages</span><strong>{{number_format($stats['unread_messages'])}}</strong><small>Open customer conversations</small></div>
       </section>
 
       <section class="cp-seller-layout" style="margin-top:16px"><section class="cp-seller-card"><h2>Store performance</h2><p class="sub">Visual overview of your current catalog and operations.</p><div class="cp-seller-bars"><div class="cp-seller-bar-row"><div class="cp-seller-bar-label"><span>Published products</span><b>{{$stats['published']}} / {{$stats['products']}}</b></div><div class="cp-seller-bar"><i style="width:{{min(100,(int)$stats['products']>0?round($stats['published']/$stats['products']*100):0)}}%"></i></div></div><div class="cp-seller-bar-row"><div class="cp-seller-bar-label"><span>Healthy inventory</span><b>{{$stats['products']-$stats['low_stock']}} / {{$stats['products']}}</b></div><div class="cp-seller-bar"><i style="width:{{min(100,(int)$stats['products']>0?round(($stats['products']-$stats['low_stock'])/$stats['products']*100):0)}}%"></i></div></div><div class="cp-seller-bar-row"><div class="cp-seller-bar-label"><span>Orders</span><b>{{$stats['orders']}}</b></div><div class="cp-seller-bar"><i style="width:{{min(100,max(5,(int)$stats['orders']))}}%"></i></div></div></div></section><section class="cp-seller-card"><h2>Business snapshot</h2><p class="sub">Key numbers from your Seller Center.</p><div class="cp-snapshot"><div><span>Paid sales</span><b>{{$stats['sales']}}</b></div><div><span>Low stock</span><b>{{$stats['low_stock']}}</b></div><div><span>Orders</span><b>{{$stats['orders']}}</b></div><div><span>Products</span><b>{{$stats['products']}}</b></div></div></section></section><div class="cp-seller-layout">
@@ -115,12 +118,22 @@
             <label>Retail price<input name="retail_price" type="number" step="0.01" min="0" required placeholder="0.00"></label>
             <label>Cost price<input name="cost_price" type="number" step="0.01" min="0" placeholder="0.00"></label>
             <label>Currency<select name="currency"><option value="USD">USD</option><option value="PKR">PKR</option><option value="CNY">CNY</option><option value="AED">AED</option><option value="EUR">EUR</option></select></label>
+            <label>Primary marketplace country<select name="country_id" required><option value="">Select country</option>@foreach($countries as $country)<option value="{{$country->id}}">{{$country->name}} ({{$country->currency_code}})</option>@endforeach</select></label>
+            <label>Fulfillment<select name="fulfillment_type" required><option value="seller">Seller fulfilled</option><option value="marketplace">Marketplace fulfillment</option></select></label>
+            <label>Sold by<select name="sold_by_type" required><option value="seller">Seller</option><option value="marketplace_fba">Marketplace fulfillment</option></select></label>
             <label>Stock<input name="stock" type="number" step="0.001" min="0" required placeholder="0"></label>
             <label class="full">Short description<textarea name="short_description" placeholder="A short customer-facing description"></textarea></label>
-            <button class="cp-seller-submit" type="submit">Submit Product for Approval →</button>
+            <button class="cp-seller-submit" type="submit">Submit Product for Approval</button>
           </form>
         </section>
       </div>
+
+      <section class="cp-seller-card cp-seller-table" style="margin-top:16px">
+        <div class="cp-seller-table-head"><div><h2>Recent orders</h2><p class="sub">Latest customer orders containing your products.</p></div><a class="cp-seller-btn" href="{{route('vendor.orders')}}">Manage orders</a></div>
+        <div class="cp-seller-table-wrap"><table><thead><tr><th>Order</th><th>Amount</th><th>Status</th><th>Fulfillment</th><th>Created</th></tr></thead><tbody>
+        @forelse($recentOrders as $order)<tr><td><strong>#{{$order->order_number}}</strong></td><td>{{$order->currency}} {{number_format((float)$order->grand_total,2)}}</td><td><span class="cp-seller-status {{$order->status}}">{{$order->status}}</span></td><td><span class="cp-seller-status {{$order->fulfillment_status}}">{{$order->fulfillment_status}}</span></td><td>{{IlluminateSupportCarbon::parse($order->created_at)->format('d M Y, H:i')}}</td></tr>@empty<tr><td colspan="5">No orders yet.</td></tr>@endforelse
+        </tbody></table></div>
+      </section>
 
       <section class="cp-seller-card cp-seller-table" id="recent-products">
         <div class="cp-seller-table-head"><div><h2>Recent products</h2><p class="sub">Latest products in your catalog.</p></div><a class="cp-seller-btn" href="{{route('vendor.products')}}">View all products</a></div>
