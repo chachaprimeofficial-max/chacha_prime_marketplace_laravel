@@ -82,7 +82,7 @@ class VendorController extends Controller
 
  private function saveProductVideos(Product $product,array $files=[]): void { foreach($files as $file){ $path=$file->store('products/videos','public'); ProductVideo::create(['product_id'=>$product->id,'path'=>$path,'title'=>$product->name,'sort_order'=>((int)ProductVideo::where('product_id',$product->id)->max('sort_order'))+1]); } }
 
- public function editProduct(Request $request,int $id){$vendor=$this->vendor($request);$product=Product::with(['images','videos','variants'])->where('vendor_id',$vendor->id)->findOrFail($id);$categories=DB::table('categories')->where('status',1)->orderBy('name')->get();$countries=DB::table('countries')->where('active',1)->orderBy('sort_order')->orderBy('name')->get();return view('vendor.product-edit',compact('vendor','product','categories','countries'));}
+ public function editProduct(Request $request,int $id){$vendor=$this->vendor($request);$product=Product::with(['images','videos','variants','marketplaces'])->where('vendor_id',$vendor->id)->findOrFail($id);$categories=DB::table('categories')->where('status',1)->orderBy('name')->get();$countries=DB::table('countries')->where('active',1)->orderBy('sort_order')->orderBy('name')->get();return view('vendor.product-edit',compact('vendor','product','categories','countries'));}
 
  public function deleteProduct(Request $request,int $id){$vendor=$this->vendor($request);$p=Product::where('vendor_id',$vendor->id)->findOrFail($id);$p->update(['status'=>'archived']);app(AuditLogService::class)->log('vendor.product.archived','Product',$p->id,['vendor_id'=>$vendor->id]);return back()->with('success','Product archived.');}
 
