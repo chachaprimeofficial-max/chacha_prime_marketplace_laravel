@@ -22,5 +22,8 @@
 .cp-hamburger-icon{display:inline-block;width:17px;height:12px;border-top:2px solid currentColor;border-bottom:2px solid currentColor;position:relative;vertical-align:-1px}.cp-hamburger-icon:after{content:"";position:absolute;left:0;right:0;top:4px;border-top:2px solid currentColor}.cp-pin-icon{width:11px;height:11px;border:2px solid currentColor;border-radius:50% 50% 50% 0;display:inline-block;transform:rotate(-45deg);margin:0 3px 2px 1px}.cp-globe-icon{display:inline-block;width:14px;height:14px;border:1.5px solid currentColor;border-radius:50%;position:relative;vertical-align:-2px;margin-right:3px}.cp-globe-icon:before{content:"";position:absolute;left:5px;top:0;bottom:0;border-left:1px solid currentColor}.cp-globe-icon:after{content:"";position:absolute;left:2px;right:2px;top:5px;border-top:1px solid currentColor}.cp-cart-icon{display:inline-block;width:24px;height:17px;border:2px solid currentColor;border-top:0;transform:skew(-8deg);position:relative;margin-bottom:4px}.cp-cart-icon:before{content:"";position:absolute;left:-5px;top:-6px;width:8px;border-top:2px solid currentColor}.cp-cart-icon:after{content:"•  •";position:absolute;left:2px;top:11px;font-size:14px;letter-spacing:6px;transform:skew(8deg)}
 .cp-live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ff526b;vertical-align:1px;box-shadow:0 0 0 3px #ff526b22}
 </style>
-</header>
+<div class="cp-support-float" data-cp-support-float>
+<a class="cp-support-float-main" href="{{route('ai.assistant')}}" aria-label="Open AI Support"><span class="cp-support-spark">✦</span><span><b>AI Support</b><small>Help with orders & products</small></span></a>
+<div class="cp-support-float-actions"><a href="{{route('ai.assistant')}}">AI Chat</a><a href="mailto:support@chachaprime.com">Email</a><a href="https://wa.me/" target="_blank" rel="noopener">WhatsApp</a></div>
+</div></header>
 @include('partials.mega-menu')
