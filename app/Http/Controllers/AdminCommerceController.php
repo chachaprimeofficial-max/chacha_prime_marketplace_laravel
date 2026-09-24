@@ -39,6 +39,30 @@ class AdminCommerceController extends Controller {
   });
   return back()->with('success','Order, shipment and notifications updated.');
  }
+ public function returns(){
+  $returns=DB::table('return_requests')->join('orders','orders.id','=','return_requests.order_id')->join('vendors','vendors.id','=','return_requests.vendor_id')->join('users','users.id','=','return_requests.customer_id')->select('return_requests.*','orders.order_number','vendors.business_name','users.name as customer_name')->latest('return_requests.id')->paginate(25);
+  return view('admin.returns',compact('returns'));
+ }
+ public function updateReturn(Request $request,int $id){
+  $data=$request->validate(['status'=>'required|in:approved,rejected,received,refunded,cancelled','resolution_note'=>'nullable|string|max:1000']);
+  DB::transaction(function()use($id,$data,$request){
+   $r=DB::table('return_requests')->where('id',$id)->lockForUpdate()->first();abort_unless($r,404);
+   $terminal=['refunded','rejected','cancelled'];abort_if(in_array($r->status,$terminal,true)&&$data['status']!==$r->status,422,'Return is already finalized.');
+   if($data['status']==='refunded'){
+    abort_unless(in_array($r->status,['approved','received'],true),422,'Return must be approved or received first.');
+    $wallet=DB::table('wallets')->where('user_id',$r->customer_id)->lockForUpdate()->first();abort_unless($wallet,422,'Customer wallet is unavailable.');
+    abort_unless(strtoupper($wallet->currency)===strtoupper($r->currency),422,'Wallet currency does not match return currency.');
+    $exists=DB::table('wallet_transactions')->where('reference_type','return_refund')->where('reference_id',$id)->exists();
+    if(!$exists){$balance=(float)$wallet->balance+(float)$r->refund_amount;DB::table('wallets')->where('id',$wallet->id)->update(['balance'=>$balance,'updated_at'=>now()]);DB::table('wallet_transactions')->insert(['wallet_id'=>$wallet->id,'type'=>'credit','amount'=>$r->refund_amount,'balance_after'=>$balance,'reference_type'=>'return_refund','reference_id'=>$id,'description'=>'Customer refund processed by marketplace admin','created_at'=>now()]);}
+    DB::table('orders')->where('id',$r->order_id)->update(['payment_status'=>'refunded','updated_at'=>now()]);
+    DB::table('payments')->where('order_id',$r->order_id)->where('status','paid')->update(['status'=>'refunded','updated_at'=>now()]);
+   }
+   DB::table('return_requests')->where('id',$id)->update(['status'=>$data['status'],'resolution_note'=>$data['resolution_note']??$r->resolution_note,'processed_at'=>in_array($data['status'],$terminal,true)?now():$r->processed_at,'updated_at'=>now()]);
+   DB::table('notifications')->insert(['user_id'=>$r->customer_id,'type'=>'return.update','title'=>'Return request updated','message'=>'Return request #'.$id.' is now '.$data['status'].'.','data'=>json_encode(['return_id'=>$id,'order_id'=>$r->order_id]),'created_at'=>now()]);
+   app(AuditLogService::class)->log('return.updated','ReturnRequest',$id,['before'=>$r->status,'after'=>$data['status'],'refund_amount'=>$r->refund_amount]);
+  });
+  return back()->with('success','Return request updated.');
+ }
  public function payments(){return view('admin.payments',['payments'=>Payment::with(['user','order'])->latest()->paginate(20)]);}
  public function updatePayment(Request $request,Payment $payment){$data=$request->validate(['status'=>'required|in:pending,paid,failed,refunded']);$before=$payment->only(['status','paid_at']);$payment->update($data);if($data['status']==='paid'){$payment->paid_at=now();$payment->save();$payment->order()->update(['payment_status'=>'paid']);}elseif($data['status']==='refunded'){$payment->order()->update(['payment_status'=>'refunded']);}app(AuditLogService::class)->log('payment.updated','Payment',$payment->id,['before'=>$before,'after'=>$data]);return back()->with('success','Payment updated.');}
  public function wallets(){return view('admin.wallets',['wallets'=>Wallet::with('user')->latest()->paginate(20)]);}
