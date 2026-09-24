@@ -14,6 +14,16 @@ use Illuminate\Support\Str;
 class VendorController extends Controller
 {
  private function vendor(Request $request): Vendor { return Vendor::where('user_id',$request->user()->id)->firstOrFail(); }
+ private function createVendorSettlements(int $orderId,int $vendorId): void {
+  $vendor=Vendor::findOrFail($vendorId);
+  $items=DB::table('order_items')->where('order_id',$orderId)->where('vendor_id',$vendorId)->get();
+  foreach($items as $item){
+   if(DB::table('vendor_settlements')->where('order_item_id',$item->id)->exists()) continue;
+   $gross=(float)$item->subtotal;$rate=(float)($vendor->commission_rate??0);$commission=round($gross*$rate/100,2);$net=round($gross-$commission,2);
+   $order=DB::table('orders')->where('id',$orderId)->first();
+   DB::table('vendor_settlements')->insert(['vendor_id'=>$vendorId,'order_id'=>$orderId,'order_item_id'=>$item->id,'gross_amount'=>$gross,'commission_amount'=>$commission,'shipping_earnings'=>0,'refund_amount'=>0,'net_amount'=>$net,'currency'=>$item->currency??($order->currency??'USD'),'status'=>'pending','eligible_at'=>now()->addDays(7),'created_at'=>now(),'updated_at'=>now()]);
+  }
+ }
 
  public function dashboard(Request $request){
   $vendor=$this->vendor($request);
@@ -227,6 +237,7 @@ public function toggleShippingMethod(Request $request,int $id){
     if($shipment) DB::table('shipments')->where('id',$shipment->id)->update(['shipping_method_id'=>$method->id,'tracking_number'=>$tracking,'status'=>$status,'shipped_at'=>$shipment->shipped_at ?: ($status==='shipped'?now():null),'delivered_at'=>$status==='delivered'?now():$shipment->delivered_at,'updated_at'=>now()]);
     else DB::table('shipments')->insert(['order_id'=>$id,'vendor_id'=>$vendor->id,'shipping_method_id'=>$method->id,'tracking_number'=>$tracking,'status'=>$status,'shipping_cost'=>0,'shipped_at'=>$status==='shipped'?now():now(),'delivered_at'=>$status==='delivered'?now():null,'created_at'=>now(),'updated_at'=>now()]);
    }
+   if($d['fulfillment_status']==='delivered') $this->createVendorSettlements($id,$vendor->id);
   });
   return back()->with('success','Order and shipment status updated.');
  }
