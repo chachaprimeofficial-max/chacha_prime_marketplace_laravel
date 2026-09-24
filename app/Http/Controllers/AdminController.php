@@ -149,4 +149,34 @@ class AdminController extends Controller
         app(AuditLogService::class)->log('module.toggled',$table,$id,['module'=>$module,'field'=>$field,'to'=>$next]);
         return back()->with('success','Status updated.');
     }
+    public function marketplaces(){
+        $countries=DB::table('countries')->orderBy('sort_order')->orderBy('name')->get();
+        $zones=DB::table('shipping_zones')->leftJoin('countries','countries.id','=','shipping_zones.country_id')->leftJoin('vendors','vendors.id','=','shipping_zones.vendor_id')->select('shipping_zones.*','countries.name as country_name','countries.code as country_code','vendors.business_name')->latest('shipping_zones.id')->get();
+        $methods=DB::table('shipping_methods')->join('shipping_zones','shipping_zones.id','=','shipping_methods.shipping_zone_id')->join('countries','countries.id','=','shipping_zones.country_id')->select('shipping_methods.*','shipping_zones.name as zone_name','countries.name as country_name','countries.code as country_code')->latest('shipping_methods.id')->get();
+        $taxRules=DB::table('tax_rules')->join('countries','countries.id','=','tax_rules.country_id')->leftJoin('categories','categories.id','=','tax_rules.category_id')->select('tax_rules.*','countries.name as country_name','countries.code as country_code','categories.name as category_name')->latest('tax_rules.id')->get();
+        $vendors=DB::table('vendors')->whereIn('status',['approved','active'])->orderBy('business_name')->get();
+        $categories=DB::table('categories')->where('status',1)->orderBy('name')->get();
+        return view('admin.marketplaces',compact('countries','zones','methods','taxRules','vendors','categories'));
+    }
+    public function marketplaceCountry(Request $request,int $id){
+        $data=$request->validate(['name'=>'required|string|max:120','code'=>'required|string|size:2','currency_code'=>'required|string|size:3','active'=>'nullable|boolean','sort_order'=>'nullable|integer|min:0']);
+        DB::table('countries')->where('id',$id)->update(['name'=>$data['name'],'code'=>strtoupper($data['code']),'currency_code'=>strtoupper($data['currency_code']),'active'=>(int)($data['active']??0),'sort_order'=>(int)($data['sort_order']??0),'updated_at'=>now()]);
+        return back()->with('success','Marketplace country updated.');
+    }
+    public function marketplaceZone(Request $request){
+        $data=$request->validate(['country_id'=>'required|exists:countries,id','vendor_id'=>'nullable|exists:vendors,id','name'=>'required|string|max:120','active'=>'nullable|boolean']);
+        $data['active']=(int)($data['active']??0);$data['created_at']=now();$data['updated_at']=now();DB::table('shipping_zones')->insert($data);return back()->with('success','Shipping zone created.');
+    }
+    public function marketplaceMethod(Request $request){
+        $data=$request->validate(['shipping_zone_id'=>'required|exists:shipping_zones,id','name'=>'required|string|max:120','code'=>'required|string|max:60','rate_type'=>'required|in:flat,weight,free','base_rate'=>'required|numeric|min:0','per_kg_rate'=>'nullable|numeric|min:0','free_over'=>'nullable|numeric|min:0','min_weight'=>'nullable|numeric|min:0','max_weight'=>'nullable|numeric|min:0','min_days'=>'required|integer|min:0|max:365','max_days'=>'required|integer|min:0|max:365','currency'=>'required|string|max:10','active'=>'nullable|boolean']);
+        $data['active']=(int)($data['active']??0);$data['per_kg_rate']=$data['per_kg_rate']??0;$data['created_at']=now();$data['updated_at']=now();DB::table('shipping_methods')->insert($data);return back()->with('success','Shipping method created.');
+    }
+    public function marketplaceTax(Request $request){
+        $data=$request->validate(['country_id'=>'required|exists:countries,id','vendor_id'=>'nullable|exists:vendors,id','category_id'=>'nullable|exists:categories,id','name'=>'required|string|max:120','rate'=>'required|numeric|min:0|max:100','prices_include_tax'=>'nullable|boolean','active'=>'nullable|boolean']);
+        $data['prices_include_tax']=(int)($data['prices_include_tax']??0);$data['active']=(int)($data['active']??0);$data['created_at']=now();$data['updated_at']=now();DB::table('tax_rules')->insert($data);return back()->with('success','Tax rule created.');
+    }
+    public function marketplaceToggle(Request $request,string $type,int $id){
+        $map=['country'=>'countries','zone'=>'shipping_zones','method'=>'shipping_methods','tax'=>'tax_rules'];abort_unless(isset($map[$type]),404);$table=$map[$type];$row=DB::table($table)->where('id',$id)->first();abort_unless($row,404);$field=$type==='country'?'active':'active';DB::table($table)->where('id',$id)->update([$field=>((int)$row->{$field})?0:1,'updated_at'=>now()]);return back()->with('success','Status updated.');
+    }
+
 }
