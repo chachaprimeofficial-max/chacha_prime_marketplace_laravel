@@ -25,7 +25,18 @@ class VendorController extends Controller
   }
  }
 
- public function dashboard(Request $request){
+ public function settings(Request $request){
+  $vendor=$this->vendor($request);
+  return view('vendor.settings',compact('vendor'));
+}
+public function updateSettings(Request $request){
+  $vendor=$this->vendor($request);
+  $data=$request->validate(['business_name'=>'required|string|max:190','legal_name'=>'nullable|string|max:190','registration_number'=>'nullable|string|max:120','tax_number'=>'nullable|string|max:120','description'=>'nullable|string|max:5000','country'=>'nullable|string|max:100']);
+  $vendor->update($data);
+  return back()->with('success','Seller account settings updated.');
+}
+
+public function dashboard(Request $request){
   $vendor=$this->vendor($request);
   $productIds=Product::where('vendor_id',$vendor->id)->pluck('id');
   $items=DB::table('order_items')->where('vendor_id',$vendor->id);
