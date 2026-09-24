@@ -12,3 +12,6 @@
 <form class="cp-step-form" method="POST" action="{{route('auth.otp.verify')}}">@csrf<input class="cp-otp-input" name="code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" required autofocus placeholder="••••••"><button class="cp-step-btn" type="submit">Verify OTP →</button></form>
 <div class="cp-step-foot"><a href="{{route('auth.login')}}">← Back to login</a></div></div></section>
 @endsection
+@push('scripts')
+<script>(function(){const b=[...document.querySelectorAll('[data-otp-digit]')],h=document.getElementById('cpOtpCode'),f=document.querySelector('form[action="{{route('auth.otp.verify')}}"]');function s(){h.value=b.map(x=>x.value).join('')}b.forEach((x,i)=>{x.addEventListener('input',()=>{x.value=x.value.replace(/\D/g,'').slice(0,1);if(x.value&&b[i+1])b[i+1].focus();s()});x.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!x.value&&b[i-1])b[i-1].focus()});x.addEventListener('paste',e=>{let v=e.clipboardData.getData('text').replace(/\D/g,'').slice(0,6);if(v){e.preventDefault();v.split('').forEach((d,j)=>{if(b[j])b[j].value=d});s()}})});f&&f.addEventListener('submit',s);b[0]?.focus()})();</script>
+@endpush
