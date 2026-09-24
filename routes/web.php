@@ -149,6 +149,10 @@ Route::middleware(['auth','role:super_admin,admin,staff'])->prefix('admin')->nam
  Route::post('/returns/{id}',[AdminCommerceController::class,'updateReturn'])->name('returns.update');
  Route::post('/payments/{payment}',[AdminCommerceController::class,'updatePayment'])->name('payments.update');
  Route::get('/wallets',[AdminCommerceController::class,'wallets'])->name('wallets');
+ Route::get('/finance',[AdminCommerceController::class,'finance'])->name('finance');
+ Route::post('/finance/vendors/{id}/commission',[AdminCommerceController::class,'updateVendorCommission'])->name('finance.vendors.commission');
+ Route::post('/finance/settlements/refresh',[AdminCommerceController::class,'refreshSettlementEligibility'])->name('finance.settlements.refresh');
+ Route::post('/finance/settlements/{id}/release',[AdminCommerceController::class,'releaseSettlement'])->name('finance.settlements.release');
  Route::get('/payouts',[AdminCommerceController::class,'payouts'])->name('payouts');
  Route::post('/payouts/{id}',[AdminCommerceController::class,'updatePayout'])->name('payouts.update');
  Route::post('/wallets/{wallet}/adjust',[AdminCommerceController::class,'adjustWallet'])->name('wallets.adjust');
