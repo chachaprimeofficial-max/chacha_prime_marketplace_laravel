@@ -40,7 +40,7 @@ Route::prefix('auth')->name('auth.')->group(function(){
  Route::get('/register',[AuthController::class,'showRegister'])->name('register');
  Route::post('/register',[AuthController::class,'register'])->name('register.submit');
  Route::get('/otp',[AuthController::class,'otp'])->name('otp');
- Route::post('/otp',[AuthController::class,'verifyOtp'])->name('otp.verify');
+ Route::post('/otp',[AuthController::class,'verifyOtp'])->name('otp.verify');\n Route::post('/otp/resend',[AuthController::class,'resendOtp'])->middleware('throttle:3,10')->name('otp.resend');
  Route::get('/totp',[AuthController::class,'totp'])->name('totp');
  Route::post('/totp',[AuthController::class,'verifyTotp'])->name('totp.verify');
  Route::post('/logout',[AuthController::class,'logout'])->middleware('auth')->name('logout');
