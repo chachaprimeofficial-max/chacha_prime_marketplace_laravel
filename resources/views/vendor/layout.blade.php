@@ -35,6 +35,7 @@
     <a class="{{request()->routeIs('vendor.messages*')?'is-active':''}}" href="{{route('vendor.messages')}}"><i class="cp-nav-icon cp-i-mail"></i><span>Customer Messages</span></a>
     <a class="{{request()->routeIs('vendor.reviews')?'is-active':''}}" href="{{route('vendor.reviews')}}"><i class="cp-nav-icon cp-i-star"></i><span>Reviews</span></a>
     <a class="{{request()->routeIs('vendor.ai')?'is-active':''}}" href="{{route('vendor.ai')}}"><i class="cp-nav-icon cp-i-ai"></i><span>AI Assistant</span></a>
+    <a class="{{request()->routeIs('vendor.settings*')?'is-active':''}}" href="{{route('vendor.settings')}}"><i class="cp-nav-icon cp-i-grid"></i><span>Account Settings</span></a>
   </nav>
   <div class="cp-vendor-help">Need help? <a href="{{route('home')}}">Open Storefront</a> or contact Chacha Prime support.</div>
 </aside><main class="cp-vendor-main">@yield('content')</main></div><script src="{{asset('js/header.js')}}" defer></script>@stack('scripts')</body></html>
