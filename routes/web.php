@@ -96,6 +96,12 @@ Route::middleware(['auth','role:vendor'])->prefix('vendor')->name('vendor.')->gr
 Route::middleware(['auth','role:super_admin,admin,staff'])->prefix('admin')->name('admin.')->group(function(){
  Route::get('/',fn()=>redirect()->route('admin.dashboard'));
  Route::get('/dashboard',[AdminController::class,'dashboard'])->name('dashboard');
+ Route::get('/marketplaces',[AdminController::class,'marketplaces'])->name('marketplaces');
+ Route::post('/marketplaces/countries/{id}',[AdminController::class,'marketplaceCountry'])->name('marketplaces.countries.update');
+ Route::post('/marketplaces/zones',[AdminController::class,'marketplaceZone'])->name('marketplaces.zones.store');
+ Route::post('/marketplaces/methods',[AdminController::class,'marketplaceMethod'])->name('marketplaces.methods.store');
+ Route::post('/marketplaces/tax-rules',[AdminController::class,'marketplaceTax'])->name('marketplaces.tax.store');
+ Route::post('/marketplaces/toggle/{type}/{id}',[AdminController::class,'marketplaceToggle'])->name('marketplaces.toggle');
  Route::get('/catalog-tools',[AdminController::class,'catalogTools'])->name('catalog-tools');
  Route::post('/subscription-plans',[AdminController::class,'storeSubscriptionPlan'])->name('subscription-plans.store');
  Route::post('/subscriptions/assign',[AdminController::class,'assignSubscription'])->name('subscriptions.assign');
