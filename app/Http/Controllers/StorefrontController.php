@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class StorefrontController extends Controller {
  public function home(){
-  $countryId=(int)session('marketplace_country_id',0);
+  $countryId=(int)(session('marketplace_country_id') ?: DB::table('countries')->where('code','PK')->value('id') ?: 0);
   $categories=DB::table('categories')->where('status',1)->whereNull('parent_id')->orderBy('sort_order')->orderBy('name')->limit(12)->get();
   $featured=Product::with(['category','images','vendor'])->where('status','published')->when($countryId,fn($q)=>$q->where(fn($x)=>$x->where('country_id',$countryId)->orWhereHas('marketplaces',fn($m)=>$m->where('countries.id',$countryId)->where('product_marketplaces.active',1))))->latest()->limit(12)->get();
   $groupOffers=DB::table('group_buying_campaigns')->join('products','products.id','=','group_buying_campaigns.product_id')->where('group_buying_campaigns.status','active')->where('group_buying_campaigns.starts_at','<=',now())->where('group_buying_campaigns.ends_at','>',now())->select('group_buying_campaigns.*','products.name','products.retail_price','products.currency')->latest('group_buying_campaigns.starts_at')->limit(8)->get();
