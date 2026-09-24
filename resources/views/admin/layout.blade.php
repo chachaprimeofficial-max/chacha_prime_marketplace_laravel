@@ -22,6 +22,7 @@
 <a class="{{request()->routeIs('admin.scan-center*')?'active':''}}" href="{{route('admin.scan-center')}}">▦ <span>Scan & Lookup</span></a>
 <a class="{{request()->routeIs('admin.categories')?'active':''}}" href="{{route('admin.categories')}}">☷ <span>Categories</span></a>
 <a class="{{request()->routeIs('admin.orders')?'active':''}}" href="{{route('admin.orders')}}">▤ <span>Orders</span></a>
+<a class="{{request()->routeIs('admin.returns*')?'active':''}}" href="{{route('admin.returns')}}">↩ <span>Returns & Refunds</span></a>
 <a class="{{request()->routeIs('admin.payments')?'active':''}}" href="{{route('admin.payments')}}">◇ <span>Payments</span></a>
 <div class="nav-title">Marketplace</div>
 <a href="{{route('admin.module','group-buying')}}">◎ <span>Group Buying</span></a>
