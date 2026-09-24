@@ -1,4 +1,4 @@
-@extends('layouts.storefront')
+@extends('layouts.customer')
 @section('title','Customer Support — Chacha Prime')
 @push('styles')<style>.cp-support{background:#f5f7fa;min-height:calc(100vh - 104px);padding:22px}.cp-support-shell{max-width:1450px;margin:auto}.cp-support-hero,.cp-support-card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;box-shadow:0 8px 25px #11182708}.cp-support-hero{padding:22px;margin-bottom:15px}.cp-support-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:15px}.cp-support-card{padding:20px}.cp-support h1{font-size:29px;margin:6px 0}.cp-support p{color:#64748b;font-size:12px}.cp-support a{display:inline-flex;padding:10px 13px;border-radius:10px;text-decoration:none;font-size:11px;font-weight:800;background:#111827;color:#fff}@media(max-width:800px){.cp-support{padding:12px}.cp-support-grid{grid-template-columns:1fr}}</style>@endpush
 @section('content')
