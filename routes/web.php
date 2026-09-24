@@ -134,6 +134,8 @@ Route::middleware(['auth','role:super_admin,admin,staff'])->prefix('admin')->nam
  Route::get('/payments',[AdminCommerceController::class,'payments'])->name('payments');
  Route::post('/payments/{payment}',[AdminCommerceController::class,'updatePayment'])->name('payments.update');
  Route::get('/wallets',[AdminCommerceController::class,'wallets'])->name('wallets');
+ Route::get('/payouts',[AdminCommerceController::class,'payouts'])->name('payouts');
+ Route::post('/payouts/{id}',[AdminCommerceController::class,'updatePayout'])->name('payouts.update');
  Route::post('/wallets/{wallet}/adjust',[AdminCommerceController::class,'adjustWallet'])->name('wallets.adjust');
  Route::get('/cards',[AdminCommerceController::class,'cards'])->name('cards');
  Route::post('/cards',[AdminCommerceController::class,'issueCard'])->name('cards.issue');
