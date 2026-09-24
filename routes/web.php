@@ -32,6 +32,12 @@ Route::middleware('auth')->group(function(){
  Route::post('/customer/addresses',[StorefrontController::class,'storeAddress'])->name('customer.addresses.store');
  Route::get('/customer/wallet',[StorefrontController::class,'wallet'])->name('customer.wallet');
  Route::get('/customer/virtual-card',[StorefrontController::class,'card'])->name('customer.card');
+ Route::get('/customer/notifications',[StorefrontController::class,'notifications'])->name('customer.notifications');
+ Route::get('/customer/reviews',[StorefrontController::class,'reviews'])->name('customer.reviews');
+ Route::get('/customer/coupons',[StorefrontController::class,'coupons'])->name('customer.coupons');
+ Route::get('/customer/support',[StorefrontController::class,'support'])->name('customer.support');
+ Route::post('/customer/support',[StorefrontController::class,'startSupport'])->name('customer.support.start');
+ Route::post('/customer/support/{id}/message',[StorefrontController::class,'supportMessage'])->name('customer.support.message');
  Route::get('/customer/orders/{id}/invoice',[StorefrontController::class,'invoice'])->name('customer.invoice');
  Route::get('/customer/wishlist',[StorefrontController::class,'wishlist'])->name('customer.wishlist');
  Route::post('/customer/wishlist/{id}',[StorefrontController::class,'addWishlist'])->name('customer.wishlist.add');
