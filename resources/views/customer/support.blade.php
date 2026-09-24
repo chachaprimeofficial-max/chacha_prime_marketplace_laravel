@@ -1,10 +1,11 @@
 @extends('layouts.storefront')
 @section('title','Customer Support — Chacha Prime')
+@push('styles')<style>.cp-support{background:#f5f7fa;min-height:calc(100vh - 104px);padding:22px}.cp-support-shell{max-width:1450px;margin:auto}.cp-support-hero,.cp-support-card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;box-shadow:0 8px 25px #11182708}.cp-support-hero{padding:22px;margin-bottom:15px}.cp-support-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:15px}.cp-support-card{padding:20px}.cp-support h1{font-size:29px;margin:6px 0}.cp-support p{color:#64748b;font-size:12px}.cp-support a{display:inline-flex;padding:10px 13px;border-radius:10px;text-decoration:none;font-size:11px;font-weight:800;background:#111827;color:#fff}@media(max-width:800px){.cp-support{padding:12px}.cp-support-grid{grid-template-columns:1fr}}</style>@endpush
 @section('content')
-<div style="max-width:1240px;margin:0 auto;padding:24px 16px 50px">
+<div class="cp-support"><div class="cp-support-shell"><div class="cp-support-hero"><div style="font-size:10px;font-weight:900;letter-spacing:2px;color:#d97706">CHACHA PRIME SUPPORT</div><h1>Help, AI chat & human support</h1><p>Get account-aware assistance, order help and human escalation from one Customer Center workspace.</p></div><div class="cp-support-grid">
 @if(session('success'))<div style="padding:12px;background:#ecfdf3;border:1px solid #abefc6;border-radius:12px;margin-bottom:14px;font-size:12px">{{session('success')}}</div>@endif
 <div style="display:grid;grid-template-columns:1.2fr .8fr;gap:16px">
-<section style="background:#fff;border:1px solid #e5e7eb;border-radius:20px;padding:20px;box-shadow:0 10px 30px #0f172a08">
+<section class="cp-support-card">
 <div style="font-size:10px;font-weight:900;letter-spacing:2px;color:#d97706">CHACHA PRIME SUPPORT</div>
 <h1 style="margin:7px 0;font-size:26px">Help, AI chat & human support</h1>
 <p style="color:#64748b;font-size:12px">Start with the AI assistant. If the issue needs a person, your case is transferred with the conversation and verified account/order context.</p>
@@ -35,5 +36,5 @@
 @else<p style="font-size:11px;color:#94a3b8">Open a case or start from the AI assistant.</p>@endif
 </section>
 </div>
-</div>
+</div></div></div>
 @endsection
