@@ -60,7 +60,7 @@ class StorefrontController extends Controller {
    }
    $vendorGroups=$products->groupBy('vendor_id'); $ids=[]; $couponUsed=false; $cartSubtotal=0;
    foreach($vendorGroups as $items){
-    foreach($items as $p){$qty=max(1,(int)$cart[$p->id]);abort_if($p->stock_status==='out_of_stock'||(float)$p->stock<$qty,422,'Stock changed. Please review your cart.');$cartSubtotal+=round($pricing->unitPrice($p,$qty,$customerType,$countryId)*$qty,2);}
+    foreach($items as $p){$qty=max(1,(int)$cart[$p->id]);$available=$pricing->stock($p,$countryId);abort_if($available<$qty,422,'Stock changed. Please review your cart.');$cartSubtotal+=round($pricing->unitPrice($p,$qty,$customerType,$countryId)*$qty,2);}
    }
    $globalDiscount=0;
    if($coupon && !$coupon->vendor_id && (!$coupon->min_order || $cartSubtotal >= (float)$coupon->min_order)){
