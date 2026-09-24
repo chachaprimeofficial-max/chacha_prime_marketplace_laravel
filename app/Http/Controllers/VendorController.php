@@ -185,7 +185,19 @@ public function toggleShippingMethod(Request $request,int $id){
   });
   return back()->with('success','Payout request submitted and the amount has been reserved.');
  }
- public function payouts(Request $request){$vendor=$this->vendor($request);$wallet=DB::table('wallets')->where('user_id',$request->user()->id)->first();$transactions=$wallet?DB::table('wallet_transactions')->where('wallet_id',$wallet->id)->latest()->paginate(20):collect();return view('vendor.payouts',compact('vendor','wallet','transactions'));}
+ public function payouts(Request $request){
+  $vendor=$this->vendor($request);
+  $wallet=DB::table('wallets')->where('user_id',$request->user()->id)->first();
+  $transactions=$wallet?DB::table('wallet_transactions')->where('wallet_id',$wallet->id)->latest()->paginate(20,['*'],'transactions_page'):collect();
+  $payouts=DB::table('vendor_payouts')->where('vendor_id',$vendor->id)->latest()->paginate(15,['*'],'payouts_page');
+  $commissionRate=(float)($vendor->commission_rate??0);
+  $sales=DB::table('order_items')->join('orders','orders.id','=','order_items.order_id')->where('order_items.vendor_id',$vendor->id)->where('orders.payment_status','paid')->sum('order_items.subtotal');
+  $settlements=DB::table('vendor_settlements')->where('vendor_id',$vendor->id);
+  $pendingSettlement=(clone $settlements)->whereIn('status',['pending','eligible'])->sum('net_amount');
+  $settled=(clone $settlements)->where('status','settled')->sum('net_amount');
+  $commission=(float)$sales*$commissionRate/100;
+  return view('vendor.payouts',compact('vendor','wallet','transactions','payouts','commissionRate','sales','commission','pendingSettlement','settled'));
+}
  public function orders(Request $request){
   $vendor=$this->vendor($request); $q=trim((string)$request->get('q','')); $status=$request->get('status'); $payment=$request->get('payment'); $fulfillment=$request->get('fulfillment');
   $base=DB::table('orders')->join('order_items','orders.id','=','order_items.order_id')->where('order_items.vendor_id',$vendor->id);
