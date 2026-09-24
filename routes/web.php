@@ -28,6 +28,10 @@ Route::middleware('auth')->group(function(){
  Route::get('/checkout',[StorefrontController::class,'checkout'])->name('checkout');
  Route::post('/checkout',[StorefrontController::class,'placeOrder'])->name('checkout.place');
  Route::get('/customer/orders',[StorefrontController::class,'customerOrders'])->name('customer.orders');
+ Route::get('/customer/addresses',[StorefrontController::class,'addresses'])->name('customer.addresses');
+ Route::post('/customer/addresses',[StorefrontController::class,'storeAddress'])->name('customer.addresses.store');
+ Route::get('/customer/wallet',[StorefrontController::class,'wallet'])->name('customer.wallet');
+ Route::get('/customer/virtual-card',[StorefrontController::class,'card'])->name('customer.card');
  Route::get('/customer/orders/{id}/invoice',[StorefrontController::class,'invoice'])->name('customer.invoice');
  Route::get('/customer/wishlist',[StorefrontController::class,'wishlist'])->name('customer.wishlist');
  Route::post('/customer/wishlist/{id}',[StorefrontController::class,'addWishlist'])->name('customer.wishlist.add');
