@@ -1,0 +1,7 @@
+@extends('layouts.customer')
+@section('title','Returns & Refunds')
+@section('content')
+<h1 class="cp-customer-page-title">Returns & Refunds</h1>
+@if(session('success'))<div class="cp-customer-panel" style="margin-bottom:14px">{{session('success')}}</div>@endif
+<div class="cp-customer-panel"><div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="padding:10px;text-align:left">Order</th><th style="padding:10px;text-align:left">Seller</th><th style="padding:10px;text-align:left">Reason</th><th style="padding:10px;text-align:left">Refund</th><th style="padding:10px;text-align:left">Status</th></tr></thead><tbody>@forelse($returns as $r)<tr><td style="padding:10px">#{{$r->order_number}}</td><td style="padding:10px">{{e($r->business_name)}}</td><td style="padding:10px">{{e($r->reason)}}</td><td style="padding:10px">{{$r->currency}} {{number_format((float)$r->refund_amount,2)}}</td><td style="padding:10px">{{$r->status}}</td></tr>@empty<tr><td colspan="5" style="padding:15px">No return requests yet.</td></tr>@endforelse</tbody></table></div>{{$returns->links()}}</div>
+@endsection
